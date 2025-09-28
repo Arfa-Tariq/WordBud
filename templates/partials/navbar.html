@@ -1,7 +1,15 @@
-<nav class="navbar">
-  <a href="{% url 'core:landing' %}">WordBud</a>
-  <a href="{% url 'dictionary:search' %}">Dictionary</a>
-  <a href="{% url 'favorites:list' %}">Favorites</a>
-  <a href="{% url 'accounts:profile' %}">Profile</a>
-  <button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+<nav style="background-color:#333;padding:1rem;color:white;">
+    <!-- Core links -->
+    <a href="{% url 'core:landing' %}" style="color:white;margin-right:1rem;">Landing</a>
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'core:home' %}" style="color:white;margin-right:1rem;">Home</a>
+        <a href="{% url 'accounts:profile' %}" style="color:white;margin-right:1rem;">Profile</a>
+        <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" style="background:none;border:none;color:white;cursor:pointer;">Logout</button>
+        </form>
+    {% else %}
+        <a href="{% url 'accounts:login' %}" style="color:white;margin-right:1rem;">Login</a>
+        <a href="{% url 'accounts:signup' %}" style="color:white;margin-right:1rem;">Sign Up</a>
+    {% endif %}
 </nav>

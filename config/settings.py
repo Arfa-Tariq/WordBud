@@ -63,6 +63,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -73,6 +74,7 @@ TEMPLATES = [
             "django.template.context_processors.request",
             "django.contrib.auth.context_processors.auth",
             "django.contrib.messages.context_processors.messages",
+            'apps.core.context_processors.current_year'
         ]},
     },
 ]
@@ -98,6 +100,9 @@ else:
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
+#This is how Django knows to not use the default User model, but the custom one we made
+AUTH_USER_MODEL = "accounts.CustomUser"
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -113,6 +118,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "landing"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

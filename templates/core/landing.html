@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Welcome — WordBud{% endblock %}
-{% block content %}
-  <section>
-    <h1>Welcome to WordBud</h1>
-    <p>Search words, save favorites, and learn daily.</p>
-    <a href="{% url 'accounts:signup' %}">Get started</a>
-  </section>
-{% endblock %}
+{% block title %}Landing - WordBud{% endblock %}
 
+{% block content %}
+<h1>Welcome to WordBud</h1>
+<p>Your dictionary management system.</p>
+<a href="{% url 'accounts:login' %}">Login</a> | 
+<a href="{% url 'accounts:signup' %}">Sign Up</a>
+{% endblock %}
