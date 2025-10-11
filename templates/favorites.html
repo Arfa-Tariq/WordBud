@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Favorite Words</title>
+</head>
+<body>
+  <h2>{{ request.user.email }}’s Favorite Words</h2>
+  
+  <!-- Display messages if any -->
+  {% if messages %}
+    <ul class="messages">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if favorites %}
+    <ul>
+      {% for item in favorites %}
+        <li>
+          <!-- Make the word a hyperlink to the dictionary details page -->
+          <a href="{% url 'dictionary:dictionary' %}?word={{ item.favorite_word }}">{{ item.favorite_word }}</a>
+
+          <!-- Remove button -->
+          <form action="{% url 'dictionary:remove_favorite' item.favorite_word %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Remove</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You haven't added any favorite words yet.</p>
+  {% endif %}
+
+  <a href="{% url 'dictionary:dictionary' %}">Back to Search</a>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>English Dictionary</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; background: #f9fafb; margin: 0; padding: 2rem; }
+    .container { max-width: 800px; margin: auto; background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+    h1 { text-align: center; color: #333; }
+    input, button { padding: 0.6rem 1rem; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #2563eb; color: white; cursor: pointer; }
+    .section { margin-top: 1.5rem; }
+    .placeholder { color: #888; font-style: italic; }
+    audio { margin-top: 0.5rem; }
+    .word-title { font-size: 1.8rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>English Dictionary</h1>
+{% if messages %}
+    <ul class="messages">
+    {% for message in messages %}
+        <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+  <form method="get">
+    <input type="text" name="word" placeholder="Search a word..." value="{{ word|default:'' }}" required>
+    <button type="submit">Search</button>
+  </form>
+
+
+
+
+
+
+  {% if error %}
+    <p style="color: red;">{{ error }}</p>
+  {% endif %}
+    
+  {% if data.word %}
+        {% if user.is_authenticated %}
+        <form action="{% url 'dictionary:add_favorite' word %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Add to Favorites</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'accounts:login' %}">Login</a> to save this word to your favorites.</p>
+        {% endif %}
+    <div class="section">
+      <span class="word-title">{{ data.word|title }}</span>
+      {% if data.phonetic %}
+        <p><strong>Phonetic:</strong> {{ data.phonetic }}</p>
+      {% endif %}
+
+      {% for ph in data.phonetics %}
+        {% if ph.audio %}
+          <audio controls src="{{ ph.audio|default:'' }}"></audio>
+        {% endif %}
+      {% endfor %}
+
+      {% if data.origin %}
+        <p><strong>Origin:</strong> {{ data.origin }}</p>
+      {% else %}
+        <p class="placeholder">No etymology available.</p>
+      {% endif %}
+    </div>
+
+    <div class="section">
+  <h3>Meanings & Parts of Speech</h3>
+  {% if data.meanings %}
+    {% for meaning in data.meanings %}
+      <div style="margin-left:1rem; margin-bottom:1rem;">
+        <p><strong style="font-size:1.1rem;">{{ meaning.partOfSpeech|title }}</strong></p>
+        {% for def in meaning.definitions %}
+          <p>
+            <span style="color:#2563eb; font-weight:bold;">{{ forloop.counter }}.</span>
+            {{ def.definition }}
+          </p>
+          {% if def.example %}
+            <p style="margin-left:1.5rem; color:#555;"><em>Example:</em> "{{ def.example }}"</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="placeholder">No meanings found.</p>
+  {% endif %}
+</div>
+
+
+    <div class="section">
+      <h3>Synonyms</h3>
+      {% if data.synonyms %}
+        <p>{{ data.synonyms|join:", " }}</p>
+      {% else %}
+        <p class="placeholder">No synonyms available.</p>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h3>Antonyms</h3>
+      {% if data.antonyms %}
+        <p>{{ data.antonyms|join:", " }}</p>
+      {% else %}
+        <p class="placeholder">No antonyms available.</p>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <h3>Did You Know?</h3>
+      {% if data.fun_fact %}
+        <p>{{ data.fun_fact }}</p>
+      {% else %}
+        <p class="placeholder">No fun fact found for this word.</p>
+      {% endif %}
+    </div>
+
+  {% endif %}
+
+  
+</div>
+</body>
+</html>

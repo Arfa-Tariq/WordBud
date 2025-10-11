@@ -22,6 +22,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
     path("dictionary/", include(("apps.dictionary.urls", "dictionary"), namespace="dictionary")),
-    path("favorites/", include(("apps.favorites.urls", "favorites"), namespace="favorites")),
     path("", include(("apps.core.urls", "core"), namespace="core")), # Home page and other core pages
 ]
