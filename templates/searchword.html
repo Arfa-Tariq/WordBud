@@ -32,7 +32,12 @@
     <button type="submit">Search</button>
   </form>
 
-
+<h3>Word of the Day</h3>
+{% if data.random_word %}
+  <p><strong>{{ data.random_word|title }}</strong> — {{ data.random_definition }}</p>
+{% else %}
+  <p><em>No word of the day available.</em></p>
+{% endif %}
 
 
 
