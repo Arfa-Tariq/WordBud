@@ -24,6 +24,21 @@
     <input type="text" name="word" placeholder="Search a word..." value="{{ word|default:'' }}" required>
     <button type="submit">Search</button>
   </form>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% if user.is_authenticated %}
+      <form action="{% url 'dictionary:add_favorite' data.word %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Add to Favorites</button>
+      </form>
+    {% else %}
+      <p><a href="{% url 'accounts:login' %}">Login</a> to save this word to your favorites.</p>
+    {% endif %}
 
   <div class="section">
     <h3>Word of the Day</h3>
