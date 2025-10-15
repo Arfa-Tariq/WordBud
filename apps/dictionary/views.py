@@ -1,23 +1,23 @@
-from django.shortcuts import render
-import requests
 import requests
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import UserData
-# Create your views here.
+from django.core.cache import cache
+from concurrent.futures import ThreadPoolExecutor
 
 def search_word(request):
     return render(request, "dictionary/search.html")
 
-def safe_request(url, params=None):
+# ------------------ helper ------------------
+def safe_request(url, params=None, timeout=5):
     """Safely makes an API request with timeout and handles errors."""
     headers = {
         "User-Agent": "MyDictionaryApp/1.0 (https://gmail.com; mutahirahmed001@gmail.com)"
     }
     try:
-        resp = requests.get(url, params=params, headers=headers, timeout=10)
+        resp = requests.get(url, params=params, headers=headers, timeout=timeout)
         if resp.status_code == 200:
             try:
                 return resp.json()
@@ -30,81 +30,186 @@ def safe_request(url, params=None):
     except Exception as e:
         print(f"⚠️ Request failed for {url}: {e}")
         return None
-
-
-
-
 def fetch_dictionary_data(word):
-    """Main dictionary info: meanings, phonetics, origin"""
-    data = {}
-    response = safe_request(f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}")
-    if not response:
-        return None
+    """Fetch word details with parallel fallback and safe defaults for template"""
+    cached = cache.get(f"dict_{word}")
+    if cached:
+        return cached
 
-    try:
-        entry = response[0]
-        data["word"] = entry.get("word")
-        data["phonetic"] = entry.get("phonetic")
-        data["phonetics"] = entry.get("phonetics", [])
-        data["meanings"] = entry.get("meanings", [])
-        data["origin"] = entry.get("origin")
-        return data
-    except Exception:
-        return None
+    data = {
+        "word": word,
+        "phonetic": "Not available",
+        "phonetics": [],
+        "meanings": [],
+        "origin": "Not available",
+        "synonyms": [],
+        "antonyms": [],
+        "fun_fact": ""
+    }
+
+    # --- Functions for parallel API calls ---
+    def get_dict_info():
+        dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{word}"
+        resp = safe_request(dict_url)
+        return resp
+
+    def get_syn_ant():
+        return fetch_synonyms_antonyms(word)
+
+    def get_wiki():
+        return fetch_wikipedia_fact(word)
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor() as executor:
+        future_dict = executor.submit(get_dict_info)
+        future_syn_ant = executor.submit(get_syn_ant)
+        future_wiki = executor.submit(get_wiki)
+
+        dict_data = future_dict.result()
+        syn_ant_data = future_syn_ant.result()
+        wiki_data = future_wiki.result()
+
+    # --- Process dictionary API first ---
+    if dict_data:
+        try:
+            entries = dict_data if isinstance(dict_data, list) else dict_data.get("entries", [])
+            if entries:
+                first_entry = entries[0]
+
+                # Phonetic
+                if first_entry.get("phonetic"):
+                    data["phonetic"] = first_entry["phonetic"]
+                if first_entry.get("pronunciations"):
+                    data["phonetics"] = first_entry["pronunciations"]
+
+                # Origin
+                if first_entry.get("origin"):
+                    data["origin"] = first_entry["origin"]
+
+                # Meanings
+                senses = first_entry.get("meanings") or first_entry.get("senses") or []
+                temp_meanings = []
+                for s in senses:
+                    defs = []
+
+                    if isinstance(s, dict):
+                        # Single definition
+                        if "definition" in s:
+                            defs.append({
+                                "definition": s.get("definition", "") or "",
+                                "example": s.get("example") or ""
+                            })
+                        # Multiple definitions
+                        elif "definitions" in s and isinstance(s["definitions"], list):
+                            for d in s["definitions"]:
+                                if isinstance(d, dict):
+                                    defs.append({
+                                        "definition": d.get("definition", "") or "",
+                                        "example": d.get("example") or ""
+                                    })
+                                else:
+                                    defs.append({
+                                        "definition": str(d) or "",
+                                        "example": ""
+                                    })
+                    elif isinstance(s, str):
+                        defs.append({
+                            "definition": s or "",
+                            "example": ""
+                        })
+
+                    if defs:
+                        temp_meanings.append({
+                            "partOfSpeech": s.get("partOfSpeech") if isinstance(s, dict) else "N/A",
+                            "definitions": defs
+                        })
+
+                if temp_meanings:
+                    data["meanings"] = temp_meanings
+
+        except Exception:
+            pass
+
+    # --- Wikipedia fallback if meanings empty ---
+    if not data["meanings"]:
+        if wiki_data and wiki_data.get("fun_fact"):
+            first_sentence = wiki_data["fun_fact"].split(".")[0].strip()
+            if first_sentence:
+                data["meanings"] = [{
+                    "partOfSpeech": "N/A",
+                    "definitions": [{"definition": first_sentence + ".", "example": ""}]
+                }]
+        if not data["meanings"]:
+            data["meanings"] = [{
+                "partOfSpeech": "N/A",
+                "definitions": [{"definition": "Not available", "example": ""}]
+            }]
+
+    # --- Origin fallback ---
+    if data["origin"] == "Not available" and wiki_data and wiki_data.get("origin_hint"):
+        data["origin"] = wiki_data["origin_hint"]
+
+    # --- Synonyms/Antonyms ---
+    if syn_ant_data:
+        data["synonyms"] = syn_ant_data.get("synonyms", [])
+        data["antonyms"] = syn_ant_data.get("antonyms", [])
+    else:
+        data["synonyms"] = []
+        data["antonyms"] = []
+
+    # --- Fun fact ---
+    if wiki_data and wiki_data.get("fun_fact"):
+        data["fun_fact"] = wiki_data["fun_fact"]
+
+    # --- Cache for 1 hour ---
+    cache.set(f"dict_{word}", data, 3600)
+    return data
 
 
+
+# ------------------ synonyms & antonyms ------------------
 def fetch_synonyms_antonyms(word):
-    """Fetch synonyms and antonyms using FreeDictionaryAPI (primary) and Datamuse (fallback)."""
-    synonyms, antonyms = set(), set()
+    cached = cache.get(f"syn_ant_{word}")
+    if cached:
+        return cached
 
-    # 1️⃣ Try FreeDictionaryAPI first
+    synonyms, antonyms = set(), set()
     dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{word}"
     dict_data = safe_request(dict_url)
 
     if dict_data:
         try:
-            if isinstance(dict_data, list):
-                entries = dict_data
-            elif isinstance(dict_data, dict):
-                entries = dict_data.get("entries", [])
-            else:
-                entries = []
-
+            entries = dict_data if isinstance(dict_data, list) else dict_data.get("entries", [])
             for entry in entries:
                 meanings = entry.get("meanings") or entry.get("senses") or []
                 for m in meanings:
-                    # some APIs call them "synonyms"/"antonyms" lists
-                    syns = m.get("synonyms") or []
-                    ants = m.get("antonyms") or []
-                    synonyms.update(syns)
-                    antonyms.update(ants)
+                    synonyms.update(m.get("synonyms") or [])
+                    antonyms.update(m.get("antonyms") or [])
         except Exception:
             pass
 
-    # 2️⃣ Fallback to Datamuse if needed
     if not antonyms:
         ant_data = safe_request(f"https://api.datamuse.com/words?rel_ant={word}")
-        if ant_data and isinstance(ant_data, list):
+        if ant_data:
             antonyms.update(a["word"] for a in ant_data if "word" in a)
-
     if not synonyms:
         syn_data = safe_request(f"https://api.datamuse.com/words?rel_syn={word}")
-        if syn_data and isinstance(syn_data, list):
+        if syn_data:
             synonyms.update(s["word"] for s in syn_data if "word" in s)
 
-    # 3️⃣ Limit long lists (for display)
-    synonyms = list(synonyms)[:10]
-    antonyms = list(antonyms)[:10]
-
-    return {
-        "synonyms": synonyms,
-        "antonyms": antonyms
+    result = {
+        "synonyms": list(synonyms)[:10],
+        "antonyms": list(antonyms)[:10]
     }
+    cache.set(f"syn_ant_{word}", result, 3600)
+    return result
 
-
-
+# ------------------ wikipedia fact ------------------
 def fetch_wikipedia_fact(word):
-    """Fetch 'Did you know' fact or etymology hint from Wikipedia"""
+    cached = cache.get(f"wiki_{word}")
+    if cached:
+        return cached
+
     result = {"fun_fact": None, "origin_hint": None}
     wiki_data = safe_request(f"https://en.wikipedia.org/api/rest_v1/page/summary/{word}")
 
@@ -112,110 +217,112 @@ def fetch_wikipedia_fact(word):
         extract = wiki_data.get("extract")
         if extract:
             result["fun_fact"] = extract
-        text = extract or ""
-        for part in text.split("."):
+        for part in (extract or "").split("."):
             if any(k in part.lower() for k in ["latin", "greek", "french", "old english", "derived from"]):
                 result["origin_hint"] = part.strip() + "."
                 break
-    print(result)
+
+    cache.set(f"wiki_{word}", result, 3600)
     return result
 
-
+# ------------------ word of the day ------------------
 def fetch_word_of_day():
-    """Fetch random word and meaning using a more reliable free dictionary (FreeDictionaryAPI).
-    Falls back to Datamuse/Wikipedia behaviour if needed and is tolerant of different response shapes.
-    """
+    cached = cache.get("word_of_day")
+    if cached:
+        return cached
+
     result = {"random_word": None, "random_definition": None}
 
-    # 1) get a random word
-    rand_data = safe_request("https://random-word-api.herokuapp.com/word")
-    if not rand_data:
-        return result
-
-    random_word = rand_data[0]
-
-    # 2) try Free Dictionary API (Wiktionary-backed)
-    # endpoint pattern: https://freedictionaryapi.com/api/v1/entries/{lang}/{word}
-    dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{random_word}"
-    dict_data = safe_request(dict_url)
-
-    # 3) Try to extract a definition from possible response shapes:
-    definition = None
     try:
-        if dict_data:
-            # FreeDictionaryAPI typically returns a dict with keys like "word" and "entries"
-            if isinstance(dict_data, dict):
-                # entries -> list -> senses -> list -> definition
-                entries = dict_data.get("entries") or dict_data.get("results") or []
-                if entries and isinstance(entries, list):
-                    # prefer first sensible definition
-                    for e in entries:
-                        # e may have "senses" (list) or "senses" nested
-                        senses = e.get("senses") or e.get("meanings") or []
-                        if senses and isinstance(senses, list):
-                            for s in senses:
-                                # senses may have "definition" or "definitions" or "definition" inside subsense
-                                if isinstance(s, dict):
-                                    defs = s.get("definition") or (s.get("definitions") and s.get("definitions")[0])
-                                    if defs:
-                                        definition = defs
-                                        break
-                                elif isinstance(s, str):
-                                    definition = s
-                                    break
-                        # fallback to entry-level synonyms/definitions
-                        if not definition:
-                            entry_defs = e.get("definition") or e.get("definitions")
-                            if entry_defs:
-                                if isinstance(entry_defs, list):
-                                    definition = entry_defs[0]
-                                else:
-                                    definition = entry_defs
-                        if definition:
-                            break
-            # Some dictionary endpoints return a list similar to dictionaryapi.dev:
-            elif isinstance(dict_data, list):
-                first = dict_data[0]
-                defs = first.get("meanings", []) if isinstance(first, dict) else []
-                if defs and defs[0].get("definitions"):
-                    definition = defs[0]["definitions"][0].get("definition")
-    except Exception:
+        rand_data = safe_request("https://random-word-api.herokuapp.com/word")
+        if not rand_data:
+            cache.set("word_of_day", result, 3600)
+            return result
+
+        random_word = rand_data[0]
+        dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{random_word}"
+        dict_data = safe_request(dict_url)
+
         definition = None
+        if dict_data:
+            try:
+                entries = dict_data if isinstance(dict_data, list) else dict_data.get("entries", [])
+                for e in entries:
+                    senses = e.get("senses") or e.get("meanings") or []
+                    for s in senses:
+                        if isinstance(s, dict):
+                            defs = s.get("definition") or (s.get("definitions") and s.get("definitions")[0])
+                            if defs:
+                                definition = defs
+                                break
+                        elif isinstance(s, str):
+                            definition = s
+                            break
+                    if definition:
+                        break
+            except Exception:
+                definition = None
 
-    # 4) If we didn't get a definition, as a fallback attempt to use Wikipedia extract
-    if not definition:
-        wiki = safe_request(f"https://en.wikipedia.org/api/rest_v1/page/summary/{random_word.title()}")
-        if wiki and isinstance(wiki, dict):
-            definition = wiki.get("extract")
+        if not definition:
+            wiki = safe_request(f"https://en.wikipedia.org/api/rest_v1/page/summary/{random_word.title()}")
+            if wiki:
+                definition = wiki.get("extract")
 
-    # 5) Fill result
-    if definition:
-        result["random_word"] = random_word
-        result["random_definition"] = definition
+        if definition:
+            result["random_word"] = random_word
+            result["random_definition"] = definition
 
+    except Exception:
+        pass
+
+    cache.set("word_of_day", result, 3600)
     return result
 
-
 def dictionary_view(request):
-    """Main view combining all fetchers"""
     word = request.GET.get("word")
     data = {}
     error = None
 
     if word:
-        dict_data = fetch_dictionary_data(word)
-        syn_ant_data = fetch_synonyms_antonyms(word)
-        wiki_data = fetch_wikipedia_fact(word)
+        # Run dictionary, synonyms, and Wikipedia fetches in parallel
+        with ThreadPoolExecutor() as executor:
+            future_dict = executor.submit(fetch_dictionary_data, word)
+            future_syn_ant = executor.submit(fetch_synonyms_antonyms, word)
+            future_wiki = executor.submit(fetch_wikipedia_fact, word)
 
-        if not dict_data:
-            error = "Could not fetch word details."
-        else:
-            data.update(dict_data)
-            data.update(syn_ant_data)
-            data.update(wiki_data)
+            # Use try/except for each future to prevent a single failure from blocking others
+            try:
+                dict_data = future_dict.result(timeout=6)
+            except Exception:
+                dict_data = {
+                    "word": word,
+                    "phonetic": "Not available",
+                    "phonetics": [],
+                    "meanings": [{"partOfSpeech": "N/A", "definitions": ["Not available"]}],
+                    "origin": "Not available",
+                }
 
-            if not data.get("origin") and data.get("origin_hint"):
+            try:
+                syn_ant_data = future_syn_ant.result(timeout=6)
+            except Exception:
+                syn_ant_data = {"synonyms": [], "antonyms": []}
+
+            try:
+                wiki_data = future_wiki.result(timeout=6)
+            except Exception:
+                wiki_data = {"fun_fact": None, "origin_hint": None}
+
+        # Merge results
+        data.update(dict_data)
+        data.update(syn_ant_data)
+        data.update(wiki_data)
+
+        # Fill origin if missing
+        if not data.get("origin") or data.get("origin") == "Not available":
+            if data.get("origin_hint"):
                 data["origin"] = data["origin_hint"]
+            else:
+                data["origin"] = "Not available"
 
     # Word of the day
     data.update(fetch_word_of_day())
@@ -223,24 +330,16 @@ def dictionary_view(request):
     return render(request, "dictionary/searchword.html", {"data": data, "word": word, "error": error})
 
 
-# ---------- add favorite (POST) ----------
+# ------------------ favorites ------------------
 @login_required
 def add_favorite(request, word):
     user = request.user
-
-    # Add the word if it doesn't exist
     if not UserData.objects.filter(user=user, favorite_word=word).exists():
         UserData.objects.create(user=user, favorite_word=word)
         messages.success(request, f'"{word}" added to your favorites!')
     else:
         messages.info(request, f'"{word}" is already in your favorites.')
-
-    # Stay on the same page with query parameters
-    referer = request.META.get('HTTP_REFERER')  # URL of the previous page
-    if referer:
-        return redirect(referer)
-    else:
-        return redirect('dictionary:dictionary')  # fallback
+    return redirect(request.META.get('HTTP_REFERER', reverse('dictionary:dictionary')))
 
 @login_required
 def favorites_list(request):
@@ -249,14 +348,10 @@ def favorites_list(request):
 
 @login_required
 def remove_favorite(request, word):
-    user = request.user
-    # Delete the favorite if it exists
-    favorite = UserData.objects.filter(user=user, favorite_word=word)
+    favorite = UserData.objects.filter(user=request.user, favorite_word=word)
     if favorite.exists():
         favorite.delete()
         messages.success(request, f'"{word}" has been removed from your favorites.')
     else:
         messages.info(request, f'"{word}" was not found in your favorites.')
-
-    # Redirect back to the favorites page
     return redirect('dictionary:favorites_list')

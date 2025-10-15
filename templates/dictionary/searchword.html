@@ -19,82 +19,55 @@
 
 <div class="container">
   <h1>English Dictionary</h1>
-{% if messages %}
-    <ul class="messages">
-    {% for message in messages %}
-        <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-{% endif %}
 
   <form method="get">
     <input type="text" name="word" placeholder="Search a word..." value="{{ word|default:'' }}" required>
     <button type="submit">Search</button>
   </form>
 
-<h3>Word of the Day</h3>
-{% if data.random_word %}
-  <p><strong>{{ data.random_word|title }}</strong> — {{ data.random_definition }}</p>
-{% else %}
-  <p><em>No word of the day available.</em></p>
-{% endif %}
-
-
-
+  <div class="section">
+    <h3>Word of the Day</h3>
+    {% if data.random_word %}
+      <p><strong>{{ data.random_word|title }}</strong> — {{ data.random_definition|default:"No definition available." }}</p>
+    {% else %}
+      <p class="placeholder">No word of the day available.</p>
+    {% endif %}
+  </div>
 
   {% if error %}
     <p style="color: red;">{{ error }}</p>
   {% endif %}
-    
+
   {% if data.word %}
-        {% if user.is_authenticated %}
-        <form action="{% url 'dictionary:add_favorite' word %}" method="post">
-            {% csrf_token %}
-            <button type="submit">Add to Favorites</button>
-        </form>
-        {% else %}
-        <p><a href="{% url 'accounts:login' %}">Login</a> to save this word to your favorites.</p>
-        {% endif %}
     <div class="section">
       <span class="word-title">{{ data.word|title }}</span>
-      {% if data.phonetic %}
-        <p><strong>Phonetic:</strong> {{ data.phonetic }}</p>
-      {% endif %}
+      <p><strong>Phonetic:</strong> {{ data.phonetic }}</p>
+      <p><strong>Origin:</strong> {{ data.origin }}</p>
 
       {% for ph in data.phonetics %}
         {% if ph.audio %}
-          <audio controls src="{{ ph.audio|default:'' }}"></audio>
+          <audio controls src="{{ ph.audio }}"></audio>
         {% endif %}
       {% endfor %}
-
-      {% if data.origin %}
-        <p><strong>Origin:</strong> {{ data.origin }}</p>
-      {% else %}
-        <p class="placeholder">No etymology available.</p>
-      {% endif %}
     </div>
 
-    <div class="section">
-  <h3>Meanings & Parts of Speech</h3>
-  {% if data.meanings %}
+<div class="section">
+  <h3>Definitions</h3>
+  <ul>
     {% for meaning in data.meanings %}
-      <div style="margin-left:1rem; margin-bottom:1rem;">
-        <p><strong style="font-size:1.1rem;">{{ meaning.partOfSpeech|title }}</strong></p>
-        {% for def in meaning.definitions %}
-          <p>
-            <span style="color:#2563eb; font-weight:bold;">{{ forloop.counter }}.</span>
-            {{ def.definition }}
-          </p>
+      {% for def in meaning.definitions %}
+        <li>
+          {{ def.definition }}
           {% if def.example %}
             <p style="margin-left:1.5rem; color:#555;"><em>Example:</em> "{{ def.example }}"</p>
           {% endif %}
-        {% endfor %}
-      </div>
+        </li>
+      {% endfor %}
     {% endfor %}
-  {% else %}
-    <p class="placeholder">No meanings found.</p>
-  {% endif %}
+  </ul>
 </div>
+
+
 
 
     <div class="section">
@@ -123,10 +96,8 @@
         <p class="placeholder">No fun fact found for this word.</p>
       {% endif %}
     </div>
-
   {% endif %}
 
-  
 </div>
 </body>
 </html>
