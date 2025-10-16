@@ -7,7 +7,7 @@
 <div class="dictionary-results">
     <!-- Search Bar -->
     <div class="search-section">
-        <form method="get" class="search-form">
+        <form method="get" class="search-form" id="search-form">
             <div class="input-group">
                 <input 
                     type="text" 
@@ -18,7 +18,7 @@
                     required
                     id="word-search-input"
                 >
-                <button class="btn btn-primary" type="submit">
+                <button class="btn btn-primary" type="submit" id="search-btn">
                     <i class="fas fa-search"></i> Search
                 </button>
             </div>
@@ -51,6 +51,16 @@
         </div>
     {% endif %}
 
+    <!-- Loading indicator -->
+    <div id="loading-indicator" class="loading-section" style="display: none;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Searching for word definitions...</p>
+        </div>
+    </div>
+
     <!-- Word Results -->
     {% if data.word %}
     <div class="word-results">
@@ -59,18 +69,42 @@
             <div class="word-title-section">
                 <h1 class="word-title">{{ data.word|title }}</h1>
                 <div class="word-meta">
+                    <!-- Word difficulty and frequency indicators -->
+                    <div class="word-indicators">
+                        <span class="word-length-badge">{{ data.word|length }} letters</span>
+                        {% if data.word|length <= 4 %}
+                            <span class="difficulty-badge easy">Easy</span>
+                        {% elif data.word|length <= 8 %}
+                            <span class="difficulty-badge medium">Medium</span>
+                        {% else %}
+                            <span class="difficulty-badge hard">Hard</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Phonetic text display -->
                     {% if data.phonetic and data.phonetic != "Not available" %}
                         <span class="phonetic">{{ data.phonetic }}</span>
                     {% endif %}
                     
-                    <!-- Audio pronunciations -->
-                    {% for phonetic in data.phonetics %}
-                        {% if phonetic.audio %}
-                            <button class="btn btn-sm btn-outline-primary audio-btn" onclick="playAudio('{{ phonetic.audio }}')">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                        {% endif %}
-                    {% endfor %}
+                    <!-- Phonetics with audio -->
+                    {% if data.phonetics %}
+                        <div class="phonetics-container">
+                            {% for phonetic in data.phonetics %}
+                                {% if phonetic.text %}
+                                    <div class="phonetic-item">
+                                        <span class="phonetic-text">{{ phonetic.text }}</span>
+                                        {% if phonetic.audio %}
+                                            <button class="btn btn-sm btn-outline-primary audio-btn" 
+                                                    onclick="playAudio('{{ phonetic.audio }}')"
+                                                    title="Play pronunciation">
+                                                <i class="fas fa-volume-up"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             
@@ -148,6 +182,10 @@
                                 </a>
                             {% endfor %}
                         </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Click any synonym to look it up
+                        </small>
                     {% else %}
                         <p class="text-muted">No synonyms available.</p>
                     {% endif %}
@@ -165,6 +203,10 @@
                                 </a>
                             {% endfor %}
                         </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Click any antonym to look it up
+                        </small>
                     {% else %}
                         <p class="text-muted">No antonyms available.</p>
                     {% endif %}
@@ -177,6 +219,27 @@
         <div class="fun-fact-section">
             <h4><i class="fas fa-lightbulb"></i> Did You Know?</h4>
             <p class="fun-fact-text">{{ data.fun_fact }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Pronunciation Guide -->
+        {% if data.phonetics %}
+        <div class="pronunciation-guide">
+            <h4><i class="fas fa-microphone"></i> Pronunciation Guide</h4>
+            <div class="pronunciation-info">
+                <p class="guide-text">
+                    <i class="fas fa-info-circle"></i> 
+                    Click the audio buttons to hear different pronunciations. 
+                    The phonetic symbols show how the word sounds using the International Phonetic Alphabet (IPA).
+                </p>
+                <div class="ipa-examples">
+                    <small class="text-muted">
+                        <strong>Common IPA symbols:</strong> 
+                        /ə/ = "uh" (schwa), /ɪ/ = "i" in "bit", /ʊ/ = "oo" in "book", 
+                        /æ/ = "a" in "cat", /θ/ = "th" in "think", /ð/ = "th" in "this"
+                    </small>
+                </div>
+            </div>
         </div>
         {% endif %}
     </div>
@@ -226,6 +289,19 @@
     margin-bottom: 0.5rem;
 }
 
+.loading-section {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 2rem 0;
+}
+
+.loading-section .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
 .word-header {
     display: flex;
     justify-content: space-between;
@@ -244,18 +320,94 @@
 
 .word-meta {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.word-indicators {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.word-length-badge, .difficulty-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.word-length-badge {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.difficulty-badge.easy {
+    background: #d4edda;
+    color: #155724;
+}
+
+.difficulty-badge.medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.difficulty-badge.hard {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 .phonetic {
     font-family: 'Courier New', monospace;
     color: #6c757d;
     font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.phonetics-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.phonetic-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8f9fa;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.phonetic-text {
+    font-family: 'Segoe UI', 'Arial Unicode MS', 'Lucida Sans Unicode', sans-serif;
+    color: #495057;
+    font-size: 1rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .audio-btn {
     padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.audio-btn:hover {
+    background: #0d6efd;
+    color: white;
+    transform: scale(1.1);
 }
 
 .definitions-section {
@@ -300,7 +452,7 @@
     padding-left: 1rem;
 }
 
-.origin-section, .synonyms-section, .antonyms-section, .fun-fact-section {
+.origin-section, .synonyms-section, .antonyms-section, .fun-fact-section, .pronunciation-guide {
     margin-bottom: 2rem;
 }
 
@@ -308,6 +460,29 @@
     font-size: 1rem;
     line-height: 1.6;
     color: #495057;
+}
+
+.pronunciation-guide {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #0d6efd;
+}
+
+.pronunciation-info {
+    margin-top: 1rem;
+}
+
+.guide-text {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.ipa-examples {
+    background: white;
+    padding: 1rem;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
 }
 
 .word-tags {
@@ -410,12 +585,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Search form handling with loading indicator
+document.getElementById('search-form').addEventListener('submit', function(e) {
+    const searchInput = document.getElementById('word-search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const wordResults = document.querySelector('.word-results');
+    
+    if (searchInput.value.trim()) {
+        // Show loading indicator
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+        if (wordResults) wordResults.style.display = 'none';
+        
+        // Disable search button
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+    }
+});
+
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
     // Ctrl/Cmd + K to focus search
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         document.getElementById('word-search-input').focus();
+    }
+    
+    // Enter key to search
+    if (e.key === 'Enter' && e.target.id === 'word-search-input') {
+        e.preventDefault();
+        document.getElementById('search-form').submit();
     }
 });
 </script>

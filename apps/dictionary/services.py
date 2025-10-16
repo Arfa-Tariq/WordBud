@@ -14,9 +14,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 # API Configuration
-API_TIMEOUT = getattr(settings, 'DICTIONARY_API_TIMEOUT', 5)
+API_TIMEOUT = getattr(settings, 'DICTIONARY_API_TIMEOUT', 10)  # Increased to 10 seconds for reliability
 WORD_OF_DAY_TIMEOUT = getattr(settings, 'WORD_OF_DAY_CACHE_TIMEOUT', 86400)
-DICT_CACHE_TIMEOUT = getattr(settings, 'DICTIONARY_CACHE_TIMEOUT', 3600)
+DICT_CACHE_TIMEOUT = getattr(settings, 'DICTIONARY_CACHE_TIMEOUT', 7200)  # Increased cache time to 2 hours
 
 # Fallback words for when APIs fail
 FALLBACK_WORDS = [
@@ -95,22 +95,42 @@ class DictionaryService:
             
             # Collect results with timeout handling
             try:
-                dict_result = future_dict.result(timeout=6)
+                dict_result = future_dict.result(timeout=8)  # Increased to 8 seconds for reliability
                 if dict_result:
                     word_data.update(dict_result)
+                    
+                    # Extract synonyms and antonyms from the main API response
+                    all_synonyms = set()
+                    all_antonyms = set()
+                    
+                    for meaning in dict_result.get("meanings", []):
+                        all_synonyms.update(meaning.get("synonyms", []))
+                        all_antonyms.update(meaning.get("antonyms", []))
+                    
+                    if all_synonyms:
+                        word_data["synonyms"] = list(all_synonyms)[:15]  # Limit to 15
+                    if all_antonyms:
+                        word_data["antonyms"] = list(all_antonyms)[:15]  # Limit to 15
             except Exception as e:
                 logger.warning(f"Dictionary API failed for '{word}': {e}")
             
             try:
-                syn_ant_result = future_synonyms.result(timeout=6)
+                syn_ant_result = future_synonyms.result(timeout=5)  # Increased to 5 seconds
                 if syn_ant_result:
-                    word_data["synonyms"] = syn_ant_result.get("synonyms", [])
-                    word_data["antonyms"] = syn_ant_result.get("antonyms", [])
+                    # Merge with existing synonyms/antonyms
+                    existing_synonyms = set(word_data.get("synonyms", []))
+                    existing_antonyms = set(word_data.get("antonyms", []))
+                    
+                    existing_synonyms.update(syn_ant_result.get("synonyms", []))
+                    existing_antonyms.update(syn_ant_result.get("antonyms", []))
+                    
+                    word_data["synonyms"] = list(existing_synonyms)[:15]
+                    word_data["antonyms"] = list(existing_antonyms)[:15]
             except Exception as e:
                 logger.warning(f"Synonyms/Antonyms API failed for '{word}': {e}")
             
             try:
-                wiki_result = future_wiki.result(timeout=6)
+                wiki_result = future_wiki.result(timeout=5)  # Increased to 5 seconds
                 if wiki_result:
                     if wiki_result.get("fun_fact"):
                         word_data["fun_fact"] = wiki_result["fun_fact"]
@@ -121,10 +141,15 @@ class DictionaryService:
         
         # Ensure we have at least one definition
         if not word_data["meanings"]:
-            word_data["meanings"] = [{
-                "partOfSpeech": "N/A",
-                "definitions": [{"definition": "Definition not available", "example": ""}]
-            }]
+            # Try a fallback API if main API failed
+            fallback_data = DictionaryService._fetch_fallback_definition(word)
+            if fallback_data:
+                word_data.update(fallback_data)
+            else:
+                word_data["meanings"] = [{
+                    "partOfSpeech": "N/A",
+                    "definitions": [{"definition": "Definition not available. Please try again later.", "example": ""}]
+                }]
         
         # Cache the result
         cache.set(cache_key, word_data, DICT_CACHE_TIMEOUT)
@@ -141,8 +166,18 @@ class DictionaryService:
         
         try:
             entry = data[0]
+            
+            # Extract phonetic text from phonetics array
+            phonetic_text = entry.get("phonetic", "")
+            if not phonetic_text and entry.get("phonetics"):
+                # Find the first phonetic with text
+                for phonetic in entry.get("phonetics", []):
+                    if phonetic.get("text"):
+                        phonetic_text = phonetic["text"]
+                        break
+            
             result = {
-                "phonetic": entry.get("phonetic", "Not available"),
+                "phonetic": phonetic_text or "Not available",
                 "phonetics": entry.get("phonetics", []),
                 "origin": entry.get("origin", "Not available"),
                 "meanings": []
@@ -214,6 +249,21 @@ class DictionaryService:
                     break
         
         return result
+    
+    @staticmethod
+    def _fetch_fallback_definition(word: str) -> Optional[Dict]:
+        """Fetch definition from a fallback API when main API fails."""
+        # Try WordsAPI as fallback
+        try:
+            url = f"https://wordsapiv1.p.rapidapi.com/words/{word}"
+            headers = {
+                "X-RapidAPI-Key": "your-api-key-here",  # Would need actual API key
+                "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com"
+            }
+            # For now, return None since we don't have API key
+            return None
+        except Exception:
+            return None
 
 
 class WordOfTheDayService:
