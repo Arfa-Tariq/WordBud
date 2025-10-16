@@ -1,357 +1,331 @@
-import requests
-from django.shortcuts import render, redirect
+"""
+Dictionary views for WordBud.
+High-performance, API-driven dictionary functionality with caching and error handling.
+"""
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import UserData
-from django.core.cache import cache
-from concurrent.futures import ThreadPoolExecutor
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
+from django.core.paginator import Paginator
+from django.db import transaction
+from django.utils import timezone
+import logging
+
+from .services import (
+    DictionaryService, 
+    WordOfTheDayService, 
+    RandomWordService, 
+    FavoritesService
+)
+from .models import UserFavorite, SearchHistory, UserData
+
+logger = logging.getLogger(__name__)
+
 
 def search_word(request):
-    return render(request, "dictionary/search.html")
-
-# ------------------ helper ------------------
-def safe_request(url, params=None, timeout=5):
-    """Safely makes an API request with timeout and handles errors."""
-    headers = {
-        "User-Agent": "MyDictionaryApp/1.0 (https://gmail.com; mutahirahmed001@gmail.com)"
+    """
+    Render the main search page.
+    Shows search form and word of the day.
+    """
+    # Get word of the day for the search page
+    word_of_day = WordOfTheDayService.get_word_of_the_day()
+    
+    context = {
+        'word_of_day': word_of_day,
+        'page_title': 'Dictionary Search'
     }
-    try:
-        resp = requests.get(url, params=params, headers=headers, timeout=timeout)
-        if resp.status_code == 200:
-            try:
-                return resp.json()
-            except ValueError:
-                print("⚠️ Response not JSON from:", url)
-                return None
-        else:
-            print(f"⚠️ API returned {resp.status_code} for {url}")
-            return None
-    except Exception as e:
-        print(f"⚠️ Request failed for {url}: {e}")
-        return None
-def fetch_dictionary_data(word):
-    """Fetch word details with parallel fallback and safe defaults for template"""
-    cached = cache.get(f"dict_{word}")
-    if cached:
-        return cached
+    
+    return render(request, "dictionary/search.html", context)
 
-    data = {
-        "word": word,
-        "phonetic": "Not available",
-        "phonetics": [],
-        "meanings": [],
-        "origin": "Not available",
-        "synonyms": [],
-        "antonyms": [],
-        "fun_fact": ""
-    }
-
-    # --- Functions for parallel API calls ---
-    def get_dict_info():
-        dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{word}"
-        resp = safe_request(dict_url)
-        return resp
-
-    def get_syn_ant():
-        return fetch_synonyms_antonyms(word)
-
-    def get_wiki():
-        return fetch_wikipedia_fact(word)
-
-    from concurrent.futures import ThreadPoolExecutor
-    with ThreadPoolExecutor() as executor:
-        future_dict = executor.submit(get_dict_info)
-        future_syn_ant = executor.submit(get_syn_ant)
-        future_wiki = executor.submit(get_wiki)
-
-        dict_data = future_dict.result()
-        syn_ant_data = future_syn_ant.result()
-        wiki_data = future_wiki.result()
-
-    # --- Process dictionary API first ---
-    if dict_data:
-        try:
-            entries = dict_data if isinstance(dict_data, list) else dict_data.get("entries", [])
-            if entries:
-                first_entry = entries[0]
-
-                # Phonetic
-                if first_entry.get("phonetic"):
-                    data["phonetic"] = first_entry["phonetic"]
-                if first_entry.get("pronunciations"):
-                    data["phonetics"] = first_entry["pronunciations"]
-
-                # Origin
-                if first_entry.get("origin"):
-                    data["origin"] = first_entry["origin"]
-
-                # Meanings
-                senses = first_entry.get("meanings") or first_entry.get("senses") or []
-                temp_meanings = []
-                for s in senses:
-                    defs = []
-
-                    if isinstance(s, dict):
-                        # Single definition
-                        if "definition" in s:
-                            defs.append({
-                                "definition": s.get("definition", "") or "",
-                                "example": s.get("example") or ""
-                            })
-                        # Multiple definitions
-                        elif "definitions" in s and isinstance(s["definitions"], list):
-                            for d in s["definitions"]:
-                                if isinstance(d, dict):
-                                    defs.append({
-                                        "definition": d.get("definition", "") or "",
-                                        "example": d.get("example") or ""
-                                    })
-                                else:
-                                    defs.append({
-                                        "definition": str(d) or "",
-                                        "example": ""
-                                    })
-                    elif isinstance(s, str):
-                        defs.append({
-                            "definition": s or "",
-                            "example": ""
-                        })
-
-                    if defs:
-                        temp_meanings.append({
-                            "partOfSpeech": s.get("partOfSpeech") if isinstance(s, dict) else "N/A",
-                            "definitions": defs
-                        })
-
-                if temp_meanings:
-                    data["meanings"] = temp_meanings
-
-        except Exception:
-            pass
-
-    # --- Wikipedia fallback if meanings empty ---
-    if not data["meanings"]:
-        if wiki_data and wiki_data.get("fun_fact"):
-            first_sentence = wiki_data["fun_fact"].split(".")[0].strip()
-            if first_sentence:
-                data["meanings"] = [{
-                    "partOfSpeech": "N/A",
-                    "definitions": [{"definition": first_sentence + ".", "example": ""}]
-                }]
-        if not data["meanings"]:
-            data["meanings"] = [{
-                "partOfSpeech": "N/A",
-                "definitions": [{"definition": "Not available", "example": ""}]
-            }]
-
-    # --- Origin fallback ---
-    if data["origin"] == "Not available" and wiki_data and wiki_data.get("origin_hint"):
-        data["origin"] = wiki_data["origin_hint"]
-
-    # --- Synonyms/Antonyms ---
-    if syn_ant_data:
-        data["synonyms"] = syn_ant_data.get("synonyms", [])
-        data["antonyms"] = syn_ant_data.get("antonyms", [])
-    else:
-        data["synonyms"] = []
-        data["antonyms"] = []
-
-    # --- Fun fact ---
-    if wiki_data and wiki_data.get("fun_fact"):
-        data["fun_fact"] = wiki_data["fun_fact"]
-
-    # --- Cache for 1 hour ---
-    cache.set(f"dict_{word}", data, 3600)
-    return data
-
-
-
-# ------------------ synonyms & antonyms ------------------
-def fetch_synonyms_antonyms(word):
-    cached = cache.get(f"syn_ant_{word}")
-    if cached:
-        return cached
-
-    synonyms, antonyms = set(), set()
-    dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{word}"
-    dict_data = safe_request(dict_url)
-
-    if dict_data:
-        try:
-            entries = dict_data if isinstance(dict_data, list) else dict_data.get("entries", [])
-            for entry in entries:
-                meanings = entry.get("meanings") or entry.get("senses") or []
-                for m in meanings:
-                    synonyms.update(m.get("synonyms") or [])
-                    antonyms.update(m.get("antonyms") or [])
-        except Exception:
-            pass
-
-    if not antonyms:
-        ant_data = safe_request(f"https://api.datamuse.com/words?rel_ant={word}")
-        if ant_data:
-            antonyms.update(a["word"] for a in ant_data if "word" in a)
-    if not synonyms:
-        syn_data = safe_request(f"https://api.datamuse.com/words?rel_syn={word}")
-        if syn_data:
-            synonyms.update(s["word"] for s in syn_data if "word" in s)
-
-    result = {
-        "synonyms": list(synonyms)[:10],
-        "antonyms": list(antonyms)[:10]
-    }
-    cache.set(f"syn_ant_{word}", result, 3600)
-    return result
-
-# ------------------ wikipedia fact ------------------
-def fetch_wikipedia_fact(word):
-    cached = cache.get(f"wiki_{word}")
-    if cached:
-        return cached
-
-    result = {"fun_fact": None, "origin_hint": None}
-    wiki_data = safe_request(f"https://en.wikipedia.org/api/rest_v1/page/summary/{word}")
-
-    if wiki_data:
-        extract = wiki_data.get("extract")
-        if extract:
-            result["fun_fact"] = extract
-        for part in (extract or "").split("."):
-            if any(k in part.lower() for k in ["latin", "greek", "french", "old english", "derived from"]):
-                result["origin_hint"] = part.strip() + "."
-                break
-
-    cache.set(f"wiki_{word}", result, 3600)
-    return result
-
-# ------------------ word of the day ------------------
-def fetch_word_of_day():
-    cached = cache.get("word_of_day")
-    if cached:
-        return cached
-
-    result = {"random_word": None, "random_definition": None}
-
-    try:
-        rand_data = safe_request("https://random-word-api.herokuapp.com/word")
-        if not rand_data:
-            cache.set("word_of_day", result, 3600)
-            return result
-
-        random_word = rand_data[0]
-        dict_url = f"https://freedictionaryapi.com/api/v1/entries/en/{random_word}"
-        dict_data = safe_request(dict_url)
-
-        definition = None
-        if dict_data:
-            try:
-                entries = dict_data if isinstance(dict_data, list) else dict_data.get("entries", [])
-                for e in entries:
-                    senses = e.get("senses") or e.get("meanings") or []
-                    for s in senses:
-                        if isinstance(s, dict):
-                            defs = s.get("definition") or (s.get("definitions") and s.get("definitions")[0])
-                            if defs:
-                                definition = defs
-                                break
-                        elif isinstance(s, str):
-                            definition = s
-                            break
-                    if definition:
-                        break
-            except Exception:
-                definition = None
-
-        if not definition:
-            wiki = safe_request(f"https://en.wikipedia.org/api/rest_v1/page/summary/{random_word.title()}")
-            if wiki:
-                definition = wiki.get("extract")
-
-        if definition:
-            result["random_word"] = random_word
-            result["random_definition"] = definition
-
-    except Exception:
-        pass
-
-    cache.set("word_of_day", result, 3600)
-    return result
 
 def dictionary_view(request):
-    word = request.GET.get("word")
-    data = {}
-    error = None
-
+    """
+    Main dictionary lookup view.
+    Handles word searches and displays comprehensive word information.
+    """
+    word = request.GET.get("word", "").strip()
+    context = {
+        'word': word,
+        'page_title': f'Dictionary - {word.title()}' if word else 'Dictionary'
+    }
+    
     if word:
-        # Run dictionary, synonyms, and Wikipedia fetches in parallel
-        with ThreadPoolExecutor() as executor:
-            future_dict = executor.submit(fetch_dictionary_data, word)
-            future_syn_ant = executor.submit(fetch_synonyms_antonyms, word)
-            future_wiki = executor.submit(fetch_wikipedia_fact, word)
-
-            # Use try/except for each future to prevent a single failure from blocking others
+        try:
+            # Get comprehensive word data
+            word_data = DictionaryService.get_word_definition(word)
+            context['data'] = word_data
+            
+            # Track search history (optional)
+            if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated:
+                try:
+                    SearchHistory.objects.create(
+                        user=request.user,
+                        word=word,
+                        ip_address=request.META.get('REMOTE_ADDR')
+                    )
+                except Exception:
+                    pass  # Silently fail if search history can't be saved
+            
+            # Check if word is in user's favorites
+            if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated:
+                try:
+                    context['is_favorite'] = FavoritesService.is_favorite(request.user, word)
+                except Exception:
+                    context['is_favorite'] = False
+            
+        except Exception as e:
+            logger.error(f"Error fetching word data for '{word}': {e}")
             try:
-                dict_data = future_dict.result(timeout=6)
+                messages.error(request, f"Sorry, we couldn't find information for '{word}'. Please try another word.")
             except Exception:
-                dict_data = {
-                    "word": word,
-                    "phonetic": "Not available",
-                    "phonetics": [],
-                    "meanings": [{"partOfSpeech": "N/A", "definitions": ["Not available"]}],
-                    "origin": "Not available",
-                }
+                pass  # Silently fail if messages can't be added
+            context['error'] = True
+    
+    # Always include word of the day
+    try:
+        word_of_day = WordOfTheDayService.get_word_of_the_day()
+        context['word_of_day'] = word_of_day
+    except Exception as e:
+        logger.error(f"Error fetching word of the day: {e}")
+        context['word_of_day'] = {
+            'word': 'serendipity',
+            'definition': 'The occurrence and development of events by chance in a happy or beneficial way.'
+        }
+    
+    return render(request, "dictionary/searchword.html", context)
 
+
+@require_http_methods(["GET"])
+def random_word_view(request):
+    """
+    Get a random word with definition.
+    Can be called via AJAX for dynamic updates.
+    """
+    try:
+        random_data = RandomWordService.get_random_word()
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # AJAX request - return JSON
+            return JsonResponse(random_data)
+        else:
+            # Regular request - redirect to dictionary view
+            return redirect(f"{reverse('dictionary:dictionary')}?word={random_data['word']}")
+            
+    except Exception as e:
+        logger.error(f"Error getting random word: {e}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Failed to get random word'}, status=500)
+        else:
             try:
-                syn_ant_data = future_syn_ant.result(timeout=6)
+                messages.error(request, "Sorry, couldn't get a random word right now.")
             except Exception:
-                syn_ant_data = {"synonyms": [], "antonyms": []}
-
-            try:
-                wiki_data = future_wiki.result(timeout=6)
-            except Exception:
-                wiki_data = {"fun_fact": None, "origin_hint": None}
-
-        # Merge results
-        data.update(dict_data)
-        data.update(syn_ant_data)
-        data.update(wiki_data)
-
-        # Fill origin if missing
-        if not data.get("origin") or data.get("origin") == "Not available":
-            if data.get("origin_hint"):
-                data["origin"] = data["origin_hint"]
-            else:
-                data["origin"] = "Not available"
-
-    # Word of the day
-    data.update(fetch_word_of_day())
-
-    return render(request, "dictionary/searchword.html", {"data": data, "word": word, "error": error})
+                pass
+            return redirect('dictionary:search')
 
 
-# ------------------ favorites ------------------
 @login_required
+@require_http_methods(["POST"])
 def add_favorite(request, word):
-    user = request.user
-    if not UserData.objects.filter(user=user, favorite_word=word).exists():
-        UserData.objects.create(user=user, favorite_word=word)
-        messages.success(request, f'"{word}" added to your favorites!')
-    else:
-        messages.info(request, f'"{word}" is already in your favorites.')
+    """
+    Add a word to user's favorites.
+    Handles both AJAX and regular form submissions.
+    """
+    try:
+        with transaction.atomic():
+            created = FavoritesService.add_favorite(request.user, word)
+            
+            if created:
+                message = f'"{word.title()}" added to your favorites!'
+                try:
+                    messages.success(request, message)
+                except Exception:
+                    pass
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True, 
+                        'message': message,
+                        'is_favorite': True
+                    })
+            else:
+                message = f'"{word.title()}" is already in your favorites.'
+                try:
+                    messages.info(request, message)
+                except Exception:
+                    pass
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False, 
+                        'message': message,
+                        'is_favorite': True
+                    })
+                    
+    except Exception as e:
+        logger.error(f"Error adding favorite '{word}' for user {request.user}: {e}")
+        message = "Sorry, couldn't add to favorites right now."
+        try:
+            messages.error(request, message)
+        except Exception:
+            pass
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': message}, status=500)
+    
+    # Redirect back to the referring page or dictionary view
     return redirect(request.META.get('HTTP_REFERER', reverse('dictionary:dictionary')))
+
+
+@login_required
+@require_http_methods(["POST"])
+def remove_favorite(request, word):
+    """
+    Remove a word from user's favorites.
+    """
+    try:
+        with transaction.atomic():
+            removed = FavoritesService.remove_favorite(request.user, word)
+            
+            if removed:
+                message = f'"{word.title()}" removed from your favorites.'
+                try:
+                    messages.success(request, message)
+                except Exception:
+                    pass
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True, 
+                        'message': message,
+                        'is_favorite': False
+                    })
+            else:
+                message = f'"{word.title()}" was not in your favorites.'
+                try:
+                    messages.info(request, message)
+                except Exception:
+                    pass
+                
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False, 
+                        'message': message,
+                        'is_favorite': False
+                    })
+                    
+    except Exception as e:
+        logger.error(f"Error removing favorite '{word}' for user {request.user}: {e}")
+        message = "Sorry, couldn't remove from favorites right now."
+        try:
+            messages.error(request, message)
+        except Exception:
+            pass
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': message}, status=500)
+    
+    return redirect(request.META.get('HTTP_REFERER', reverse('dictionary:favorites_list')))
+
 
 @login_required
 def favorites_list(request):
-    favorites = UserData.objects.filter(user=request.user)
-    return render(request, 'dictionary/favorites.html', {'favorites': favorites})
+    """
+    Display user's favorite words with pagination.
+    """
+    favorites_queryset = FavoritesService.get_user_favorites(request.user)
+    
+    # Pagination
+    paginator = Paginator(favorites_queryset, 20)  # 20 favorites per page
+    page_number = request.GET.get('page')
+    favorites_page = paginator.get_page(page_number)
+    
+    context = {
+        'favorites': favorites_page,
+        'page_title': 'My Favorite Words'
+    }
+    
+    return render(request, 'dictionary/favorites.html', context)
+
 
 @login_required
-def remove_favorite(request, word):
-    favorite = UserData.objects.filter(user=request.user, favorite_word=word)
-    if favorite.exists():
-        favorite.delete()
-        messages.success(request, f'"{word}" has been removed from your favorites.')
-    else:
-        messages.info(request, f'"{word}" was not found in your favorites.')
-    return redirect('dictionary:favorites_list')
+def search_history(request):
+    """
+    Display user's search history with pagination.
+    Optional feature for user engagement.
+    """
+    history_queryset = SearchHistory.objects.filter(user=request.user)
+    
+    # Pagination
+    paginator = Paginator(history_queryset, 50)  # 50 searches per page
+    page_number = request.GET.get('page')
+    history_page = paginator.get_page(page_number)
+    
+    context = {
+        'history': history_page,
+        'page_title': 'Search History'
+    }
+    
+    return render(request, 'dictionary/history.html', context)
+
+
+def word_of_day_refresh(request):
+    """
+    Force refresh the word of the day.
+    Useful for admin or testing purposes.
+    """
+    try:
+        from django.core.cache import cache
+        cache.delete("word_of_the_day")
+        
+        word_of_day = WordOfTheDayService.get_word_of_the_day()
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse(word_of_day)
+        else:
+            try:
+                messages.success(request, "Word of the day refreshed!")
+            except Exception:
+                pass
+            return redirect('dictionary:search')
+            
+    except Exception as e:
+        logger.error(f"Error refreshing word of the day: {e}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Failed to refresh word of the day'}, status=500)
+        else:
+            try:
+                messages.error(request, "Sorry, couldn't refresh word of the day.")
+            except Exception:
+                pass
+            return redirect('dictionary:search')
+
+
+# API Views for potential future mobile app or AJAX calls
+def api_word_lookup(request, word):
+    """
+    API endpoint for word lookup.
+    Returns JSON data for the word.
+    """
+    try:
+        word_data = DictionaryService.get_word_definition(word)
+        return JsonResponse(word_data)
+    except Exception as e:
+        logger.error(f"API word lookup failed for '{word}': {e}")
+        return JsonResponse({'error': 'Word lookup failed'}, status=500)
+
+
+def api_word_of_day(request):
+    """
+    API endpoint for word of the day.
+    """
+    try:
+        word_of_day = WordOfTheDayService.get_word_of_the_day()
+        return JsonResponse(word_of_day)
+    except Exception as e:
+        logger.error(f"API word of day failed: {e}")
+        return JsonResponse({'error': 'Word of day lookup failed'}, status=500)

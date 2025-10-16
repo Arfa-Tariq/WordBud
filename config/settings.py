@@ -28,7 +28,7 @@ SECRET_KEY = config("SECRET_KEY", default="dev-secret-key")
 DEBUG = config("DEBUG", default=True, cast=bool)
 
 # Allow all hosts during development; in production, set ALLOWED_HOSTS in .env
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1,testserver", cast=Csv())
 
 # Application definition
 
@@ -146,3 +146,21 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Cache configuration for high-performance dictionary lookups
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 3600,  # 1 hour default
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+            'CULL_FREQUENCY': 3,
+        }
+    }
+}
+
+# Dictionary API settings
+DICTIONARY_API_TIMEOUT = 5  # seconds
+WORD_OF_DAY_CACHE_TIMEOUT = 86400  # 24 hours
+DICTIONARY_CACHE_TIMEOUT = 3600  # 1 hour

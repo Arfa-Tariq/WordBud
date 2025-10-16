@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Search History - WordBud{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <h1 class="display-5">
+            <i class="fas fa-history text-info"></i> Search History
+        </h1>
+        <p class="lead text-muted">Your recent word searches</p>
+        
+        <div class="header-actions">
+            <a href="{% url 'dictionary:search' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> New Search
+            </a>
+            <a href="{% url 'dictionary:favorites_list' %}" class="btn btn-outline-warning">
+                <i class="fas fa-star"></i> Favorites
+            </a>
+        </div>
+    </div>
+
+    <!-- History List -->
+    {% if history %}
+        <div class="history-stats">
+            <p class="text-muted">
+                <i class="fas fa-info-circle"></i> 
+                You have searched {{ history.paginator.count }} word{{ history.paginator.count|pluralize }} recently
+            </p>
+        </div>
+
+        <div class="history-list">
+            {% for search in history %}
+                <div class="history-item">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="history-content">
+                                <div class="word-info">
+                                    <h6 class="word-title">
+                                        <a href="{% url 'dictionary:dictionary' %}?word={{ search.word }}" class="word-link">
+                                            {{ search.word|title }}
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> 
+                                        {{ search.searched_at|timesince }} ago
+                                        {% if search.searched_at.date != today %}
+                                            on {{ search.searched_at|date:"M j, Y" }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="history-actions">
+                                    <a href="{% url 'dictionary:dictionary' %}?word={{ search.word }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    {% if user.is_authenticated %}
+                                        <form action="{% url 'dictionary:add_favorite' search.word %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-star"></i> Favorite
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if history.has_other_pages %}
+            <nav aria-label="History pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if history.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">
+                                <i class="fas fa-angle-double-left"></i> First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ history.previous_page_number }}">
+                                <i class="fas fa-angle-left"></i> Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ history.number }} of {{ history.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if history.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ history.next_page_number }}">
+                                Next <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ history.paginator.num_pages }}">
+                                Last <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-content">
+                <i class="fas fa-search empty-icon"></i>
+                <h3>No search history</h3>
+                <p class="text-muted">
+                    Start searching for words to build your search history.
+                </p>
+                <div class="empty-state-actions">
+                    <a href="{% url 'dictionary:search' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search"></i> Start Searching
+                    </a>
+                    <a href="{% url 'dictionary:random_word' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-dice"></i> Random Word
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="quick-actions mt-5">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="{% url 'dictionary:search' %}" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-home"></i> Dictionary Home
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'dictionary:favorites_list' %}" class="btn btn-outline-warning w-100">
+                    <i class="fas fa-star"></i> My Favorites
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'dictionary:random_word' %}" class="btn btn-outline-success w-100">
+                    <i class="fas fa-surprise"></i> Surprise Me
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.history-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header-actions {
+    margin-top: 1.5rem;
+}
+
+.header-actions .btn {
+    margin: 0 0.5rem;
+}
+
+.history-stats {
+    margin-bottom: 2rem;
+}
+
+.history-list {
+    margin-bottom: 2rem;
+}
+
+.history-item {
+    margin-bottom: 1rem;
+}
+
+.history-item .card {
+    border: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.history-item .card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.history-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.word-info {
+    flex: 1;
+}
+
+.word-title {
+    margin-bottom: 0.25rem;
+}
+
+.word-link {
+    text-decoration: none;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.word-link:hover {
+    color: #3498db;
+}
+
+.history-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-state-actions {
+    margin-top: 2rem;
+}
+
+.empty-state-actions .btn {
+    margin: 0 0.5rem;
+}
+
+.quick-actions {
+    border-top: 1px solid #dee2e6;
+    padding-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .history-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .history-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .header-actions .btn,
+    .empty-state-actions .btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}
+</style>
+{% endblock %}
