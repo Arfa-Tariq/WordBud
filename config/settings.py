@@ -81,6 +81,18 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+# Caching — fast in-memory cache for low-latency lookups
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "wordbud-locmem",
+        "TIMEOUT": None,  # use per-key TTL
+        "OPTIONS": {
+            "MAX_ENTRIES": 10000,
+        },
+    }
+}
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 

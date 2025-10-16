@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Search — WordBud{% endblock %}
+{% block content %}
+  <h1>Search the Dictionary</h1>
+  <form method="get" action="{% url 'dictionary:dictionary' %}" style="margin-bottom: 1rem;">
+    <input type="text" name="word" placeholder="Enter a word..." required>
+    <button type="submit">Search</button>
+    <a href="{% url 'dictionary:random' %}" style="margin-left:.5rem;">Random</a>
+  </form>
+
+  {% if wotd.random_word %}
+    <section>
+      <h3>Word of the Day</h3>
+      <p><strong>{{ wotd.random_word|title }}</strong> — {{ wotd.random_definition|default:"No definition available." }}</p>
+      {% if user.is_staff %}
+        <p><a href="{% url 'dictionary:refresh_wotd' %}">Refresh</a></p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <p style="margin-top: 1rem;"><a href="{% url 'dictionary:favorites_list' %}">Your Favorites</a></p>
+{% endblock %}
