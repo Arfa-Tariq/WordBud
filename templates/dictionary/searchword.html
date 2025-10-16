@@ -51,6 +51,16 @@
         </div>
     {% endif %}
 
+    <!-- Loading indicator -->
+    <div id="loading-indicator" class="loading-section" style="display: none;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Searching for word information...</p>
+        </div>
+    </div>
+
     <!-- Word Results -->
     {% if data.word %}
     <div class="word-results">
@@ -66,11 +76,24 @@
                     <!-- Audio pronunciations -->
                     {% for phonetic in data.phonetics %}
                         {% if phonetic.audio %}
-                            <button class="btn btn-sm btn-outline-primary audio-btn" onclick="playAudio('{{ phonetic.audio }}')">
+                            <button class="btn btn-sm btn-outline-primary audio-btn" onclick="playAudio('{{ phonetic.audio }}')" title="Play pronunciation">
                                 <i class="fas fa-volume-up"></i>
                             </button>
                         {% endif %}
                     {% endfor %}
+                    
+                    <!-- Show all phonetic representations -->
+                    {% if data.phonetics %}
+                        <div class="phonetics-list">
+                            {% for phonetic in data.phonetics %}
+                                {% if phonetic.text and phonetic.text != data.phonetic %}
+                                    <span class="phonetic-variant" title="Pronunciation variant">
+                                        <i class="fas fa-microphone"></i> {{ phonetic.text }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             
@@ -102,6 +125,62 @@
             {% endif %}
         </div>
 
+        <!-- Pronunciation Guide -->
+        {% if data.phonetics or data.phonetic != "Not available" %}
+        <div class="pronunciation-section">
+            <h4><i class="fas fa-volume-up"></i> Pronunciation</h4>
+            <div class="pronunciation-guide">
+                <div class="pronunciation-main">
+                    <span class="ipa-symbol">{{ data.phonetic }}</span>
+                    <span class="pronunciation-label">IPA</span>
+                </div>
+                {% for phonetic in data.phonetics %}
+                    {% if phonetic.audio %}
+                        <div class="pronunciation-audio">
+                            <button class="btn btn-outline-primary btn-sm audio-btn" onclick="playAudio('{{ phonetic.audio }}')" title="Play {{ phonetic.text|default:'pronunciation' }}">
+                                <i class="fas fa-play"></i> 
+                                {% if phonetic.text %}{{ phonetic.text }}{% else %}Play{% endif %}
+                            </button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            <!-- Pronunciation Help -->
+            <div class="pronunciation-help">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i> 
+                    IPA (International Phonetic Alphabet) symbols help you pronounce words correctly. 
+                    <button class="btn btn-link btn-sm p-0" onclick="togglePronunciationGuide()">Learn more</button>
+                </small>
+            </div>
+            
+            <!-- Pronunciation Guide (hidden by default) -->
+            <div id="pronunciation-guide" class="pronunciation-guide-detail" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Common IPA Symbols:</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>/ə/</strong> - schwa (about, taken)</li>
+                            <li><strong>/ɪ/</strong> - short i (bit, sit)</li>
+                            <li><strong>/i/</strong> - long e (beet, seat)</li>
+                            <li><strong>/æ/</strong> - short a (cat, hat)</li>
+                            <li><strong>/ɑ/</strong> - long a (father, calm)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Stress Marks:</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>/ˈ/</strong> - primary stress</li>
+                            <li><strong>/ˌ/</strong> - secondary stress</li>
+                            <li><strong>/ː/</strong> - long vowel</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Definitions -->
         <div class="definitions-section">
             <h3><i class="fas fa-book"></i> Definitions</h3>
@@ -116,9 +195,12 @@
                             <li class="definition-item">
                                 <p class="definition-text">{{ definition.definition }}</p>
                                 {% if definition.example %}
-                                    <p class="example-text">
-                                        <em><i class="fas fa-quote-left"></i> {{ definition.example }}</em>
-                                    </p>
+                                    <div class="example-container">
+                                        <p class="example-text">
+                                            <i class="fas fa-quote-left text-muted"></i> 
+                                            <em>{{ definition.example }}</em>
+                                        </p>
+                                    </div>
                                 {% endif %}
                             </li>
                         {% endfor %}
@@ -246,16 +328,113 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .phonetic {
     font-family: 'Courier New', monospace;
     color: #6c757d;
     font-size: 1.1rem;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.phonetics-list {
+    margin-top: 0.5rem;
+}
+
+.phonetic-variant {
+    font-family: 'Courier New', monospace;
+    color: #6c757d;
+    font-size: 0.9rem;
+    background: #e9ecef;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    margin-right: 0.5rem;
+    display: inline-block;
 }
 
 .audio-btn {
     padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.audio-btn:hover {
+    transform: scale(1.1);
+}
+
+.pronunciation-section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.pronunciation-guide {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.pronunciation-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ipa-symbol {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #007bff;
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 2px solid #007bff;
+}
+
+.pronunciation-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pronunciation-audio {
+    margin-left: auto;
+}
+
+.pronunciation-help {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.pronunciation-guide-detail {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.loading-section {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 2rem 0;
+}
+
+.loading-section .spinner-border {
+    width: 3rem;
+    height: 3rem;
 }
 
 .definitions-section {
@@ -292,12 +471,19 @@
     margin-bottom: 0.5rem;
 }
 
+.example-container {
+    margin-top: 0.5rem;
+}
+
 .example-text {
     color: #6c757d;
     margin-left: 1rem;
     font-size: 0.95rem;
     border-left: 3px solid #dee2e6;
-    padding-left: 1rem;
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
 }
 
 .origin-section, .synonyms-section, .antonyms-section, .fun-fact-section {
@@ -409,6 +595,27 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.focus();
     }
 });
+
+// Show loading indicator on form submission
+document.querySelector('.search-form').addEventListener('submit', function() {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const wordResults = document.querySelector('.word-results');
+    
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
+    if (wordResults) {
+        wordResults.style.display = 'none';
+    }
+});
+
+// Toggle pronunciation guide
+function togglePronunciationGuide() {
+    const guide = document.getElementById('pronunciation-guide');
+    if (guide) {
+        guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
+    }
+}
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
