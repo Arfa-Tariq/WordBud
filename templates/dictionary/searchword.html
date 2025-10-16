@@ -7,7 +7,7 @@
 <div class="dictionary-results">
     <!-- Search Bar -->
     <div class="search-section">
-        <form method="get" class="search-form">
+        <form method="get" class="search-form" id="search-form">
             <div class="input-group">
                 <input 
                     type="text" 
@@ -18,8 +18,9 @@
                     required
                     id="word-search-input"
                 >
-                <button class="btn btn-primary" type="submit">
-                    <i class="fas fa-search"></i> Search
+                <button class="btn btn-primary" type="submit" id="search-btn">
+                    <i class="fas fa-search" id="search-icon"></i> 
+                    <span id="search-text">Search</span>
                 </button>
             </div>
         </form>
@@ -51,6 +52,27 @@
         </div>
     {% endif %}
 
+    <!-- Loading Indicator -->
+    {% if word and not data.word %}
+    <div class="loading-section text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Searching for word definitions...</p>
+    </div>
+    {% endif %}
+
+    <!-- No Results Message -->
+    {% if word and not data.word and not error %}
+    <div class="no-results-section text-center py-5">
+        <div class="alert alert-warning" role="alert">
+            <h4><i class="fas fa-search"></i> No Definitions Found</h4>
+            <p>We couldn't find any definitions for "<strong>{{ word }}</strong>".</p>
+            <p class="mb-0">Try checking the spelling or searching for a different word.</p>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Word Results -->
     {% if data.word %}
     <div class="word-results">
@@ -64,9 +86,16 @@
                     {% endif %}
                     
                     <!-- Audio pronunciations -->
+                    {% if data.pronunciation_audio %}
+                        <button class="btn btn-sm btn-outline-primary audio-btn" onclick="playAudio('{{ data.pronunciation_audio }}')" title="Play pronunciation">
+                            <i class="fas fa-volume-up"></i> 🔊
+                        </button>
+                    {% endif %}
+                    
+                    <!-- Additional phonetic options -->
                     {% for phonetic in data.phonetics %}
-                        {% if phonetic.audio %}
-                            <button class="btn btn-sm btn-outline-primary audio-btn" onclick="playAudio('{{ phonetic.audio }}')">
+                        {% if phonetic.audio and phonetic.audio != data.pronunciation_audio %}
+                            <button class="btn btn-sm btn-outline-secondary audio-btn" onclick="playAudio('{{ phonetic.audio }}')" title="Alternative pronunciation">
                                 <i class="fas fa-volume-up"></i>
                             </button>
                         {% endif %}
@@ -172,6 +201,24 @@
             </div>
         </div>
 
+        <!-- Example Sentences -->
+        {% if data.examples %}
+        <div class="examples-section">
+            <h4><i class="fas fa-quote-left"></i> Example Sentences</h4>
+            <div class="examples-list">
+                {% for example in data.examples %}
+                    <div class="example-item">
+                        <p class="example-text">
+                            <i class="fas fa-quote-left text-muted"></i> 
+                            {{ example }}
+                            <i class="fas fa-quote-right text-muted"></i>
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Fun Fact -->
         {% if data.fun_fact %}
         <div class="fun-fact-section">
@@ -255,7 +302,15 @@
 }
 
 .audio-btn {
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.75rem;
+    margin-left: 0.5rem;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.audio-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,123,255,0.3);
 }
 
 .definitions-section {
@@ -300,7 +355,7 @@
     padding-left: 1rem;
 }
 
-.origin-section, .synonyms-section, .antonyms-section, .fun-fact-section {
+.origin-section, .synonyms-section, .antonyms-section, .fun-fact-section, .examples-section {
     margin-bottom: 2rem;
 }
 
@@ -308,6 +363,38 @@
     font-size: 1rem;
     line-height: 1.6;
     color: #495057;
+}
+
+.examples-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #007bff;
+}
+
+.examples-list {
+    margin-top: 1rem;
+}
+
+.example-item {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.example-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #495057;
+    margin: 0;
+    font-style: italic;
+}
+
+.example-text i {
+    margin: 0 0.5rem;
+    opacity: 0.6;
 }
 
 .word-tags {
@@ -394,19 +481,74 @@
 </style>
 
 <script>
-// Audio playback function
+// Audio playback function with better error handling
 function playAudio(audioUrl) {
+    if (!audioUrl) {
+        console.warn('No audio URL provided');
+        return;
+    }
+    
     const audio = new Audio(audioUrl);
-    audio.play().catch(error => {
-        console.error('Error playing audio:', error);
+    audio.preload = 'auto';
+    
+    // Add loading state
+    const buttons = document.querySelectorAll('.audio-btn');
+    buttons.forEach(btn => {
+        if (btn.onclick.toString().includes(audioUrl)) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+        }
+    });
+    
+    audio.play()
+        .then(() => {
+            console.log('Audio playing successfully');
+        })
+        .catch(error => {
+            console.error('Error playing audio:', error);
+            // Show user-friendly message
+            alert('Sorry, the audio pronunciation is not available at the moment.');
+        })
+        .finally(() => {
+            // Reset button states
+            buttons.forEach(btn => {
+                if (btn.onclick.toString().includes(audioUrl)) {
+                    btn.innerHTML = '<i class="fas fa-volume-up"></i> 🔊';
+                    btn.disabled = false;
+                }
+            });
+        });
+    
+    // Reset button when audio ends
+    audio.addEventListener('ended', () => {
+        buttons.forEach(btn => {
+            if (btn.onclick.toString().includes(audioUrl)) {
+                btn.innerHTML = '<i class="fas fa-volume-up"></i> 🔊';
+                btn.disabled = false;
+            }
+        });
     });
 }
 
-// Auto-focus search input
+// Auto-focus search input and add loading state
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('word-search-input');
+    const searchForm = document.getElementById('search-form');
+    const searchBtn = document.getElementById('search-btn');
+    const searchIcon = document.getElementById('search-icon');
+    const searchText = document.getElementById('search-text');
+    
     if (searchInput && !searchInput.value) {
         searchInput.focus();
+    }
+    
+    // Add loading state to search form
+    if (searchForm) {
+        searchForm.addEventListener('submit', function() {
+            searchBtn.disabled = true;
+            searchIcon.className = 'fas fa-spinner fa-spin';
+            searchText.textContent = 'Searching...';
+        });
     }
 });
 

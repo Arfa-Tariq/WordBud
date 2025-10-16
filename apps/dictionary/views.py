@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import cache_page
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -41,6 +42,7 @@ def search_word(request):
     return render(request, "dictionary/search.html", context)
 
 
+@cache_page(60 * 15)  # Cache for 15 minutes
 def dictionary_view(request):
     """
     Main dictionary lookup view.
@@ -83,6 +85,7 @@ def dictionary_view(request):
             except Exception:
                 pass  # Silently fail if messages can't be added
             context['error'] = True
+            context['word'] = word  # Keep the searched word for display
     
     # Always include word of the day
     try:

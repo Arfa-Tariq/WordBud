@@ -14,9 +14,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 # API Configuration
-API_TIMEOUT = getattr(settings, 'DICTIONARY_API_TIMEOUT', 5)
+API_TIMEOUT = getattr(settings, 'DICTIONARY_API_TIMEOUT', 3)  # Reduced from 5 to 3
 WORD_OF_DAY_TIMEOUT = getattr(settings, 'WORD_OF_DAY_CACHE_TIMEOUT', 86400)
-DICT_CACHE_TIMEOUT = getattr(settings, 'DICTIONARY_CACHE_TIMEOUT', 3600)
+DICT_CACHE_TIMEOUT = getattr(settings, 'DICTIONARY_CACHE_TIMEOUT', 7200)  # Increased from 3600 to 7200 (2 hours)
 
 # Fallback words for when APIs fail
 FALLBACK_WORDS = [
@@ -83,7 +83,9 @@ class DictionaryService:
             "origin": "Not available",
             "synonyms": [],
             "antonyms": [],
-            "fun_fact": ""
+            "fun_fact": "",
+            "examples": [],
+            "pronunciation_audio": None
         }
         
         # Use parallel requests for better performance
@@ -95,14 +97,29 @@ class DictionaryService:
             
             # Collect results with timeout handling
             try:
-                dict_result = future_dict.result(timeout=6)
+                dict_result = future_dict.result(timeout=8)
                 if dict_result:
                     word_data.update(dict_result)
+                    
+                    # Extract examples from definitions
+                    examples = []
+                    for meaning in word_data.get("meanings", []):
+                        for definition in meaning.get("definitions", []):
+                            if definition.get("example"):
+                                examples.append(definition["example"])
+                    word_data["examples"] = examples[:10]  # Limit to 10 examples
+                    
+                    # Find best pronunciation audio
+                    for phonetic in word_data.get("phonetics", []):
+                        if phonetic.get("audio"):
+                            word_data["pronunciation_audio"] = phonetic["audio"]
+                            break
+                            
             except Exception as e:
                 logger.warning(f"Dictionary API failed for '{word}': {e}")
             
             try:
-                syn_ant_result = future_synonyms.result(timeout=6)
+                syn_ant_result = future_synonyms.result(timeout=5)
                 if syn_ant_result:
                     word_data["synonyms"] = syn_ant_result.get("synonyms", [])
                     word_data["antonyms"] = syn_ant_result.get("antonyms", [])
@@ -110,7 +127,7 @@ class DictionaryService:
                 logger.warning(f"Synonyms/Antonyms API failed for '{word}': {e}")
             
             try:
-                wiki_result = future_wiki.result(timeout=6)
+                wiki_result = future_wiki.result(timeout=5)
                 if wiki_result:
                     if wiki_result.get("fun_fact"):
                         word_data["fun_fact"] = wiki_result["fun_fact"]
@@ -132,18 +149,33 @@ class DictionaryService:
     
     @staticmethod
     def _fetch_dictionary_api(word: str) -> Optional[Dict]:
-        """Fetch data from Free Dictionary API."""
+        """Fetch data from Free Dictionary API with fallback."""
+        # Primary API
         url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
-        data = safe_api_request(url)
+        data = safe_api_request(url, timeout=API_TIMEOUT)
         
         if not data or not isinstance(data, list) or not data:
-            return None
+            # Try alternative API as fallback
+            alt_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word.lower()}"
+            data = safe_api_request(alt_url, timeout=API_TIMEOUT)
+            
+            if not data or not isinstance(data, list) or not data:
+                return None
         
         try:
             entry = data[0]
+            
+            # Get the best phonetic text (prefer one with text)
+            phonetic_text = entry.get("phonetic", "")
+            phonetics = entry.get("phonetics", [])
+            for ph in phonetics:
+                if ph.get("text") and not phonetic_text:
+                    phonetic_text = ph["text"]
+                    break
+            
             result = {
-                "phonetic": entry.get("phonetic", "Not available"),
-                "phonetics": entry.get("phonetics", []),
+                "phonetic": phonetic_text or "Not available",
+                "phonetics": phonetics,
                 "origin": entry.get("origin", "Not available"),
                 "meanings": []
             }
@@ -158,7 +190,9 @@ class DictionaryService:
                 for definition in meaning.get("definitions", []):
                     processed_meaning["definitions"].append({
                         "definition": definition.get("definition", ""),
-                        "example": definition.get("example", "")
+                        "example": definition.get("example", ""),
+                        "synonyms": definition.get("synonyms", [])[:5],  # Limit to 5 synonyms per definition
+                        "antonyms": definition.get("antonyms", [])[:5]   # Limit to 5 antonyms per definition
                     })
                 
                 if processed_meaning["definitions"]:
@@ -175,19 +209,35 @@ class DictionaryService:
         synonyms = set()
         antonyms = set()
         
-        # Try Datamuse API for synonyms
-        syn_data = safe_api_request(f"https://api.datamuse.com/words?rel_syn={word}&max=10")
-        if syn_data:
-            synonyms.update(item.get("word", "") for item in syn_data if item.get("word"))
+        # Try Datamuse API for synonyms with shorter timeout
+        try:
+            syn_data = safe_api_request(f"https://api.datamuse.com/words?rel_syn={word}&max=15", timeout=3)
+            if syn_data and isinstance(syn_data, list):
+                synonyms.update(item.get("word", "") for item in syn_data if item.get("word"))
+        except Exception as e:
+            logger.warning(f"Synonyms API failed for '{word}': {e}")
         
-        # Try Datamuse API for antonyms
-        ant_data = safe_api_request(f"https://api.datamuse.com/words?rel_ant={word}&max=10")
-        if ant_data:
-            antonyms.update(item.get("word", "") for item in ant_data if item.get("word"))
+        # Try Datamuse API for antonyms with shorter timeout
+        try:
+            ant_data = safe_api_request(f"https://api.datamuse.com/words?rel_ant={word}&max=15", timeout=3)
+            if ant_data and isinstance(ant_data, list):
+                antonyms.update(item.get("word", "") for item in ant_data if item.get("word"))
+        except Exception as e:
+            logger.warning(f"Antonyms API failed for '{word}': {e}")
+        
+        # Try Wordnik API as backup (no API key needed for basic usage)
+        try:
+            wordnik_syn = safe_api_request(f"https://api.wordnik.com/v4/word.json/{word}/relatedWords?useCanonical=false&relationshipTypes=synonym&limitPerRelationshipType=10", timeout=3)
+            if wordnik_syn and isinstance(wordnik_syn, list):
+                for rel in wordnik_syn:
+                    if rel.get("relationshipType") == "synonym":
+                        synonyms.update(rel.get("words", []))
+        except Exception as e:
+            logger.warning(f"Wordnik synonyms API failed for '{word}': {e}")
         
         return {
-            "synonyms": list(synonyms)[:10],
-            "antonyms": list(antonyms)[:10]
+            "synonyms": list(synonyms)[:15],
+            "antonyms": list(antonyms)[:15]
         }
     
     @staticmethod
