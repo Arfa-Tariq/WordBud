@@ -1,12 +1,21 @@
-function toggleTheme() {
+document.addEventListener('DOMContentLoaded', function () {
   const html = document.documentElement;
-  const current = html.getAttribute("data-theme") || "light";
-  const next = current === "light" ? "dark" : "light";
-  html.setAttribute("data-theme", next);
-  localStorage.setItem("wb-theme", next);
-}
+  const toggleBtn = document.getElementById('themeToggleBtn');
 
-document.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("wb-theme") || "light";
-  document.documentElement.setAttribute("data-theme", saved);
+  // Detect saved preference or system preference
+  const savedTheme = localStorage.getItem('theme');
+  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  if (savedTheme) {
+    html.dataset.theme = savedTheme;
+  } else {
+    html.dataset.theme = systemPrefersDark ? 'dark' : 'light';
+  }
+
+  // Toggle theme manually
+  toggleBtn.addEventListener('click', function () {
+    const newTheme = html.dataset.theme === 'light' ? 'dark' : 'light';
+    html.dataset.theme = newTheme;
+    localStorage.setItem('theme', newTheme);
+  });
 });

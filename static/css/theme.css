@@ -1,0 +1,41 @@
+:root {
+  --color-bg-light: #f9fafb;
+  --color-text-light: #111827;
+
+  --color-bg-dark: #111827;
+  --color-text-dark: #f9fafb;
+
+  --color-accent: #4f46e5; /* Indigo */
+}
+
+html[data-theme='light'] {
+  --background: var(--color-bg-light);
+  --foreground: var(--color-text-light);
+}
+
+html[data-theme='dark'] {
+  --background: var(--color-bg-dark);
+  --foreground: var(--color-text-dark);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.theme-toggle-btn {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.9;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.theme-toggle-btn:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}

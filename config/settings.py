@@ -14,11 +14,14 @@ from pathlib import Path
 from decouple import config, Csv
 import dj_database_url
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+MW_DICTIONARY_API_KEY = os.getenv("MW_DICTIONARY_API_KEY")
+MW_THESAURUS_API_KEY = os.getenv("MW_THESAURUS_API_KEY")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -159,8 +162,3 @@ CACHES = {
         }
     }
 }
-
-# Dictionary API settings
-DICTIONARY_API_TIMEOUT = 5  # seconds
-WORD_OF_DAY_CACHE_TIMEOUT = 86400  # 24 hours
-DICTIONARY_CACHE_TIMEOUT = 3600  # 1 hour

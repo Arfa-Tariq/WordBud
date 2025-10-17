@@ -3,19 +3,41 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}WordBud{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+
+  <!-- Core Styles -->
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+
+  <!-- Favicon (optional) -->
+  <link rel="icon" href="{% static 'img/favicon.ico' %}">
 </head>
-<body>
+<body class="bg-background text-foreground transition-colors duration-300">
+
+  <!-- Navbar -->
   {% include "partials/navbar.html" %}
 
-  <main class="container">
+  <!-- Theme Toggle Button -->
+  <button id="themeToggleBtn"
+          aria-label="Toggle theme"
+          class="theme-toggle-btn"
+          style="position: fixed; top: 1rem; right: 1rem; z-index: 1000;">
+    🌞 / 🌙
+  </button>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
     {% block content %}{% endblock %}
   </main>
 
+  <!-- Footer -->
   {% include "partials/footer.html" %}
+
+  <!-- JS -->
   <script src="{% static 'js/theme-toggle.js' %}"></script>
+
+  <!-- Optional page-specific scripts -->
+  {% block scripts %}{% endblock %}
 </body>
 </html>
