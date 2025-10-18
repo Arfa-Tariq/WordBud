@@ -231,29 +231,32 @@
             
             <button class="mobile-toggle" id="mobileToggle">☰</button>
             
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="{% url 'dictionary:dictionary' %}" class="nav-link">🔍 Dictionary</a></li>
-                <li><a href="{% url 'dictionary:random_word' %}" class="nav-link">🎲 Random</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'dictionary:favorites_list' %}" class="nav-link">⭐ Favorites</a></li>
-                    <li><a href="{% url 'dictionary:search_history' %}" class="nav-link">🕒 History</a></li>
-                    <li><a href="{% url 'accounts:profile' %}" class="nav-link">👤 Profile</a></li>
-                    <li>
-                        <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; font: inherit;">🚪 Logout</button>
-                        </form>
-                    </li>
-                {% else %}
-                    <li><a href="{% url 'accounts:login' %}" class="nav-link">🔐 Login</a></li>
-                    <li><a href="{% url 'accounts:signup' %}" class="nav-link">📝 Sign Up</a></li>
-                {% endif %}
-                <li>
-                    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
-                        <span id="themeIcon">🌙</span>
-                    </button>
-                </li>
-            </ul>
+            <!-- Replace the nav menu section in base.html with this: -->
+
+<ul class="nav-menu" id="navMenu">
+    <li><a href="{% url 'dictionary:dictionary' %}" class="nav-link">🔍 Dictionary</a></li>
+    <li><a href="{% url 'translator:translate' %}" class="nav-link">🌐 Translator</a></li>
+    <li><a href="{% url 'dictionary:random_word' %}" class="nav-link">🎲 Random</a></li>
+    {% if user.is_authenticated %}
+        <li><a href="{% url 'dictionary:favorites_list' %}" class="nav-link">⭐ Favorites</a></li>
+        <li><a href="{% url 'dictionary:search_history' %}" class="nav-link">🕒 History</a></li>
+        <li><a href="{% url 'accounts:profile' %}" class="nav-link">👤 Profile</a></li>
+        <li>
+            <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; font: inherit;">🚪 Logout</button>
+            </form>
+        </li>
+    {% else %}
+        <li><a href="{% url 'accounts:login' %}" class="nav-link">🔐 Login</a></li>
+        <li><a href="{% url 'accounts:signup' %}" class="nav-link">📝 Sign Up</a></li>
+    {% endif %}
+    <li>
+        <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+            <span id="themeIcon">🌙</span>
+        </button>
+    </li>
+</ul>
         </div>
     </nav>
     

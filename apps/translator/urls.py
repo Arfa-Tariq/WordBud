@@ -1,8 +1,14 @@
-from django.urls import path
-from .views import translate_view
+"""
+URL configuration for translator app.
+"""
 
-app_name = "translator"
+from django.urls import path
+from . import views
+
+app_name = 'translator'
 
 urlpatterns = [
-    path("", translate_view, name="translate"),
+    path('', views.translate_view, name='translate'),
+    path('ajax/', views.translate_ajax, name='translate_ajax'),
+    path('detect/', views.detect_language, name='detect_language'),
 ]

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Translator – WordBud{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'translator/translator.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="translator-container">
+    <div class="page-header">
+        <h1>🌐 Language Translator</h1>
+        <p>Translate text between {{ total_languages }} languages instantly</p>
+    </div>
+    
+    <div class="translator-card">
+        <div class="translator-grid">
+            <!-- Source Panel -->
+            <div class="translation-panel source-panel">
+                <div class="panel-header">
+                    <div class="lang-selector">
+                        <label for="sourceLang">From:</label>
+                        <select id="sourceLang" class="lang-select">
+                            <option value="auto" selected>Auto-detect</option>
+                            {% for code, name in languages %}
+                            <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button id="detectBtn" class="icon-btn" title="Detect language">
+                        🔍 Detect
+                    </button>
+                </div>
+                
+                <textarea 
+                    id="sourceText" 
+                    class="translation-input" 
+                    placeholder="Enter text to translate..."
+                    maxlength="5000"
+                ></textarea>
+                
+                <div class="panel-footer">
+                    <span id="charCount" class="char-count">0 / 5000</span>
+                    <button id="clearBtn" class="icon-btn" title="Clear text">
+                        🗑️ Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Swap Button -->
+            <div class="swap-container">
+                <button id="swapBtn" class="swap-btn" title="Swap languages">
+                    ⇄
+                </button>
+            </div>
+            
+            <!-- Target Panel -->
+            <div class="translation-panel target-panel">
+                <div class="panel-header">
+                    <div class="lang-selector">
+                        <label for="targetLang">To:</label>
+                        <select id="targetLang" class="lang-select">
+                            {% for code, name in languages %}
+                            <option value="{{ code }}" {% if code == 'es' %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button id="copyBtn" class="icon-btn" title="Copy translation" disabled>
+                        📋 Copy
+                    </button>
+                </div>
+                
+                <div id="targetText" class="translation-output">
+                    <span class="placeholder-text">Translation will appear here...</span>
+                </div>
+                
+                <div class="panel-footer">
+                    <span id="translationInfo" class="translation-info"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Translate Button -->
+        <div class="action-container">
+            <button id="translateBtn" class="translate-btn" disabled>
+                <span class="btn-icon">🌍</span>
+                <span class="btn-text">Translate</span>
+            </button>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
+            <span>Translating...</span>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+    </div>
+    
+    <!-- Recent Translations -->
+    <div class="recent-translations" id="recentTranslations" style="display: none;">
+        <h3>📚 Recent Translations</h3>
+        <div id="recentList" class="recent-list"></div>
+        <button id="clearHistoryBtn" class="clear-history-btn">Clear History</button>
+    </div>
+    
+    <!-- Features Info -->
+    <div class="features-info">
+        <div class="feature-item">
+            <span class="feature-icon">🔍</span>
+            <div>
+                <h4>Auto-Detection</h4>
+                <p>Automatically detect source language</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">⚡</span>
+            <div>
+                <h4>Instant Translation</h4>
+                <p>Fast and accurate results</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">📋</span>
+            <div>
+                <h4>Easy Copy</h4>
+                <p>One-click copy to clipboard</p>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">🌍</span>
+            <div>
+                <h4>{{ total_languages }}+ Languages</h4>
+                <p>Comprehensive language support</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'translator/translator.js' %}"></script>
+{% endblock %}
