@@ -24,5 +24,5 @@ urlpatterns = [
     path("dictionary/", include(("apps.dictionary.urls", "dictionary"), namespace="dictionary")),
     path("", include(("apps.core.urls", "core"), namespace="core")), # Home page and other core pages
     path("translator/", include("apps.translator.urls", namespace="translator")),
-
+    path('games/', include('apps.games.urls')),
 ]
