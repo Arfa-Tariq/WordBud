@@ -1,0 +1,38 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+    <h1 style="margin: 0 0 15px 0; font-size: 36px;">📊 Welcome to WordBud Admin</h1>
+    <p style="margin: 0 0 20px 0; font-size: 18px; opacity: 0.95;">Manage your dictionary platform, monitor analytics, and oversee user activity.</p>
+    
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="{% url 'admin_dashboard' %}" style="background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
+            📈 View Analytics Dashboard
+        </a>
+        
+        <a href="{% url 'admin:core_searchlog_changelist' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
+            🔍 Search Logs
+        </a>
+        
+        <a href="{% url 'admin:core_translationlog_changelist' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
+            🌐 Translation Logs
+        </a>
+        
+        <a href="{% url 'admin:accounts_customuser_changelist' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
+            👥 Manage Users
+        </a>
+    </div>
+</div>
+
+{{ block.super }}
+
+<style>
+    a[href*="admin_dashboard"]:hover,
+    a[href*="searchlog"]:hover,
+    a[href*="translationlog"]:hover,
+    a[href*="customuser"]:hover {
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

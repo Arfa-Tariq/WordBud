@@ -6,7 +6,7 @@ Provides efficient management interface for favorites and search history.
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
 from .models import UserFavorite, SearchHistory, UserData
@@ -36,7 +36,7 @@ class UserFavoriteAdmin(admin.ModelAdmin):
     
     def user_email(self, obj):
         """Display user email with link to user admin."""
-        url = reverse('admin:auth_user_change', args=[obj.user.pk])
+        url = reverse('admin:accounts_customuser_change', args=[obj.user.pk])
         return format_html('<a href="{}">{}</a>', url, obj.user.email)
     user_email.short_description = 'User Email'
     user_email.admin_order_field = 'user__email'
@@ -100,7 +100,7 @@ class SearchHistoryAdmin(admin.ModelAdmin):
     def user_email(self, obj):
         """Display user email or 'Anonymous' for null users."""
         if obj.user:
-            url = reverse('admin:auth_user_change', args=[obj.user.pk])
+            url = reverse('admin:accounts_customuser_change', args=[obj.user.pk])
             return format_html('<a href="{}">{}</a>', url, obj.user.email)
         return format_html('<span style="color: #999;">Anonymous</span>')
     user_email.short_description = 'User'
@@ -166,7 +166,7 @@ class UserDataAdmin(admin.ModelAdmin):
     
     def user_email(self, obj):
         """Display user email with link."""
-        url = reverse('admin:auth_user_change', args=[obj.user.pk])
+        url = reverse('admin:accounts_customuser_change', args=[obj.user.pk])
         return format_html('<a href="{}">{}</a>', url, obj.user.email)
     user_email.short_description = 'User Email'
     user_email.admin_order_field = 'user__email'

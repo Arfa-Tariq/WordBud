@@ -1,6 +1,6 @@
 """
 Dictionary views for WordBud.
-Handles web requests and API endpoints with robust error handling.
+Handles web requests and API endpoints with robust error handling and with comprehensive logging.
 """
 
 from django.shortcuts import render, redirect
@@ -10,9 +10,13 @@ from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count
 import logging
+import time
+# Import timezone for logging
+from django.utils import timezone
 
 from . import services
 from .models import UserFavorite, SearchHistory
+from apps.core.models import SearchLog, APIHealthLog
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +38,7 @@ def get_user_agent(request):
 
 def word_lookup(request):
     """
-    Main word lookup view with comprehensive data display.
-    Handles search queries and displays all available word information.
+    Main word lookup view with comprehensive data display and logging.
     """
     word = request.GET.get("q", "").strip()
     context = {
@@ -57,6 +60,9 @@ def word_lookup(request):
     
     # Handle word search
     if word:
+        start_time = time.time()
+        found = False
+        
         try:
             # Use comprehensive search service
             search_result = services.search_word_comprehensive(word)
@@ -68,8 +74,27 @@ def word_lookup(request):
                 "suggestions": search_result.get("suggestions", []),
             })
             
-            # Record search history if results found
-            if search_result.get("found"):
+            found = search_result.get("found", False)
+            
+            # Calculate response time
+            response_time_ms = int((time.time() - start_time) * 1000)
+            
+            # Log the search
+            try:
+                SearchLog.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    word=word.lower(),
+                    searched_at=timezone.now(),
+                    ip_address=get_client_ip(request),
+                    user_agent=get_user_agent(request),
+                    found=found,
+                    response_time_ms=response_time_ms
+                )
+            except Exception as e:
+                logger.warning(f"Failed to create search log: {str(e)}")
+            
+            # Record search history (legacy - kept for backward compatibility)
+            if found:
                 try:
                     if request.user.is_authenticated:
                         SearchHistory.objects.create(
@@ -100,6 +125,19 @@ def word_lookup(request):
         except Exception as e:
             logger.error(f"Error processing word lookup for '{word}': {str(e)}")
             context["error"] = "An error occurred while processing your request."
+            
+            # Log failed search
+            try:
+                SearchLog.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    word=word.lower(),
+                    ip_address=get_client_ip(request),
+                    user_agent=get_user_agent(request),
+                    found=False,
+                    response_time_ms=None
+                )
+            except Exception as log_error:
+                logger.warning(f"Failed to log failed search: {str(log_error)}")
     
     return render(request, "dictionary/searchword.html", context)
 
@@ -203,7 +241,7 @@ def favorites_list(request):
         
         # Pagination
         page = request.GET.get('page', 1)
-        paginator = Paginator(favorites_qs, 20)  # 20 favorites per page
+        paginator = Paginator(favorites_qs, 20)
         
         try:
             favorites = paginator.page(page)
@@ -233,7 +271,7 @@ def search_history(request):
         
         # Pagination
         page = request.GET.get('page', 1)
-        paginator = Paginator(history_qs, 50)  # 50 entries per page
+        paginator = Paginator(history_qs, 50)
         
         try:
             history = paginator.page(page)
@@ -242,7 +280,7 @@ def search_history(request):
         except EmptyPage:
             history = paginator.page(paginator.num_pages)
         
-        # Get popular searches (top 10)
+        # Get popular searches
         popular_words = (
             SearchHistory.objects
             .filter(user=request.user)
@@ -269,17 +307,29 @@ def search_history(request):
 # API Endpoints
 @require_http_methods(["GET"])
 def api_word_lookup(request):
-    """
-    API endpoint for word lookup.
-    Returns JSON with dictionary and thesaurus data.
-    """
+    """API endpoint for word lookup with logging."""
     word = request.GET.get("word", "").strip()
     
     if not word:
         return JsonResponse({"error": "No word provided"}, status=400)
     
+    start_time = time.time()
+    
     try:
         result = services.search_word_comprehensive(word)
+        response_time_ms = int((time.time() - start_time) * 1000)
+        
+        # Log API usage
+        try:
+            SearchLog.objects.create(
+                word=word.lower(),
+                ip_address=get_client_ip(request),
+                user_agent=get_user_agent(request),
+                found=result.get("found", False),
+                response_time_ms=response_time_ms
+            )
+        except Exception as e:
+            logger.warning(f"Failed to log API search: {str(e)}")
         
         response_data = {
             "word": word,
@@ -299,10 +349,7 @@ def api_word_lookup(request):
 
 @require_http_methods(["GET"])
 def api_word_of_day(request):
-    """
-    API endpoint for word of the day.
-    Returns JSON with word of the day data.
-    """
+    """API endpoint for word of the day."""
     try:
         word_data = services.get_word_of_the_day()
         return JsonResponse(word_data)

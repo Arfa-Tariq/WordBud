@@ -163,12 +163,22 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'dictionary.log',
+            'filename': BASE_DIR / 'logs' / 'wordbud.log',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'apps.dictionary': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.translator': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.core': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,

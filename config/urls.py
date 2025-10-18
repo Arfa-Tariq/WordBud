@@ -17,12 +17,21 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from apps.core.admin_dashboard import admin_dashboard, clear_cache, export_analytics
 
 urlpatterns = [
+        # Custom Admin Dashboard (staff-only)
+    path("admin/dashboard/", admin_dashboard, name="admin_dashboard"),
+    path("admin/clear-cache/", clear_cache, name="clear_cache"),
+    path("admin/export-analytics/", export_analytics, name="export_analytics"),
+    # Admin
     path("admin/", admin.site.urls),
+        
+    # Apps
     path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
     path("dictionary/", include(("apps.dictionary.urls", "dictionary"), namespace="dictionary")),
-    path("", include(("apps.core.urls", "core"), namespace="core")), # Home page and other core pages
+    path("", include(("apps.core.urls", "core"), namespace="core")),
     path("translator/", include("apps.translator.urls", namespace="translator")),
     path('games/', include('apps.games.urls')),
 ]
+
