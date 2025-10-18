@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.dictionary",
     "apps.core",
+    "apps.translator",
 ]
 
 MIDDLEWARE = [
