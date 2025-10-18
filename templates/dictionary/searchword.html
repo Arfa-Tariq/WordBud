@@ -41,6 +41,8 @@
         cursor: pointer;
         transition: all 0.3s;
         font-weight: 500;
+        text-decoration: none;
+        display: inline-block;
     }
     
     .btn-primary {
@@ -236,12 +238,21 @@
         border-radius: 8px;
         border-left: 4px solid #4a90e2;
         margin: 15px 0;
+        list-style: none;
     }
     
     .examples-list li {
         margin-bottom: 12px;
         line-height: 1.6;
         color: #495057;
+        padding-left: 20px;
+        position: relative;
+    }
+    
+    .examples-list li:before {
+        content: "💬";
+        position: absolute;
+        left: 0;
     }
     
     .examples-list em {
@@ -327,6 +338,7 @@
         border-bottom: 2px solid #e0e0e0;
         margin-bottom: 20px;
         gap: 5px;
+        flex-wrap: wrap;
     }
     
     .tab {
@@ -365,29 +377,27 @@
     }
     
     /* Dark theme support */
-    @media (prefers-color-scheme: dark) {
-        .word-entry {
-            background: #2c3e50;
-            border-color: #34495e;
-        }
-        
-        .word-title {
-            color: #ecf0f1;
-        }
-        
-        .pronunciation {
-            background: #34495e;
-        }
-        
-        .examples-list {
-            background: #34495e;
-        }
-        
-        .search-form input[type="text"] {
-            background: #34495e;
-            border-color: #4a5568;
-            color: #ecf0f1;
-        }
+    body.dark-theme .word-entry {
+        background: #2c3e50;
+        border-color: #34495e;
+    }
+    
+    body.dark-theme .word-title {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .pronunciation {
+        background: #34495e;
+    }
+    
+    body.dark-theme .examples-list {
+        background: #34495e;
+    }
+    
+    body.dark-theme .search-form input[type="text"] {
+        background: #34495e;
+        border-color: #4a5568;
+        color: #ecf0f1;
     }
     
     @media (max-width: 768px) {
@@ -412,10 +422,10 @@
     <!-- Search Form -->
     <form method="get" action="{% url 'dictionary:search' %}" class="search-form">
         <input type="text" name="q" placeholder="Search for any word..." value="{{ word }}" required autofocus>
-        <button type="submit" class="btn btn-primary">Search</button>
-        <a href="{% url 'dictionary:random_word' %}" class="btn btn-secondary">Random Word</a>
+        <button type="submit" class="btn btn-primary">🔍 Search</button>
+        <a href="{% url 'dictionary:random_word' %}" class="btn btn-secondary">🎲 Random Word</a>
         {% if user.is_authenticated and word and results %}
-            <button type="button" id="favoriteBtn" class="btn btn-favorite {% if is_favorite %}active{% endif %}">
+            <button type="button" id="favoriteBtn" class="btn btn-favorite {% if is_favorite %}active{% endif %}" data-word="{{ word }}">
                 {% if is_favorite %}★ Remove from Favorites{% else %}☆ Add to Favorites{% endif %}
             </button>
         {% endif %}
@@ -425,9 +435,11 @@
     {% if word_of_day and not word %}
     <div class="word-of-day">
         <h3>🌟 Word of the Day: <strong>{{ word_of_day.word|title }}</strong></h3>
+        {% if word_of_day.part_of_speech %}
         <p><em>{{ word_of_day.part_of_speech }}</em></p>
+        {% endif %}
         <p>{{ word_of_day.definition }}</p>
-        <small>{{ word_of_day.date }}</small>
+        <a href="?q={{ word_of_day.word }}" style="color: white; text-decoration: underline;">Learn more →</a>
     </div>
     {% endif %}
 
@@ -441,7 +453,7 @@
     <!-- Spelling Suggestions -->
     {% if suggestions %}
     <div class="suggestions">
-        <strong>Suggestions:</strong><br>
+        <strong>Did you mean:</strong><br>
         {% for suggestion in suggestions %}
             <a href="?q={{ suggestion }}">{{ suggestion }}</a>
         {% endfor %}
@@ -463,10 +475,10 @@
 
         <!-- Tabs for organized content -->
         <div class="tabs">
-            <button class="tab active" data-tab="definitions-{{ forloop.counter }}">Definitions</button>
-            {% if entry.examples %}<button class="tab" data-tab="examples-{{ forloop.counter }}">Examples</button>{% endif %}
-            {% if entry.pronunciations or entry.audio %}<button class="tab" data-tab="pronunciation-{{ forloop.counter }}">Pronunciation</button>{% endif %}
-            {% if entry.etymology %}<button class="tab" data-tab="etymology-{{ forloop.counter }}">Etymology</button>{% endif %}
+            <button class="tab active" data-tab="definitions-{{ forloop.counter }}">📖 Definitions</button>
+            {% if entry.examples %}<button class="tab" data-tab="examples-{{ forloop.counter }}">💬 Examples</button>{% endif %}
+            {% if entry.pronunciations or entry.audio %}<button class="tab" data-tab="pronunciation-{{ forloop.counter }}">🔊 Pronunciation</button>{% endif %}
+            {% if entry.etymology %}<button class="tab" data-tab="etymology-{{ forloop.counter }}">📜 Etymology</button>{% endif %}
         </div>
 
         <!-- Definitions Tab -->
@@ -506,7 +518,7 @@
                 
                 {% if entry.audio %}
                 <div class="audio-player">
-                    <strong>Listen:</strong><br>
+                    <strong>🔊 Listen:</strong><br>
                     {% for audio_url in entry.audio %}
                     <audio controls>
                         <source src="{{ audio_url }}" type="audio/mpeg">
@@ -529,7 +541,7 @@
                 {% endfor %}
             </div>
             {% if entry.date %}
-            <p><strong>First Known Use:</strong> {{ entry.date|safe }}</p>
+            <p style="margin-top: 15px;"><strong>First Known Use:</strong> {{ entry.date|safe }}</p>
             {% endif %}
         </div>
         {% endif %}
@@ -578,7 +590,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add active class to clicked tab and corresponding content
             this.classList.add('active');
-            document.getElementById(targetId).classList.add('active');
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         });
     });
     
@@ -587,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (favoriteBtn) {
         favoriteBtn.addEventListener('click', function() {
             const isFavorite = this.classList.contains('active');
-            const word = '{{ word|escapejs }}';
+            const word = this.getAttribute('data-word');
             const url = isFavorite ? '{% url "dictionary:remove_from_favorites" %}' : '{% url "dictionary:add_to_favorites" %}';
             
             fetch(url, {

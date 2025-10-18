@@ -159,6 +159,64 @@
         opacity: 0.9;
     }
     
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .pagination a,
+    .pagination span {
+        padding: 8px 15px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+    }
+    
+    .pagination a:hover {
+        background: #4a90e2;
+        color: white;
+        border-color: #4a90e2;
+    }
+    
+    .pagination .current {
+        background: #4a90e2;
+        color: white;
+        border-color: #4a90e2;
+    }
+    
+    body.dark-theme .favorite-card {
+        background: #2c3e50;
+        border-color: #34495e;
+    }
+    
+    body.dark-theme .favorite-word {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .pagination a,
+    body.dark-theme .pagination span {
+        background: #34495e;
+        border-color: #4a5568;
+        color: #ecf0f1;
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+    }
+    
     @media (max-width: 768px) {
         .favorites-grid {
             grid-template-columns: 1fr;
@@ -177,8 +235,12 @@
     {% if favorites %}
     <div class="stats-bar">
         <div class="stat-item">
-            <span class="stat-number">{{ favorites|length }}</span>
+            <span class="stat-number">{{ favorites.paginator.count }}</span>
             <span class="stat-label">Total Favorites</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{{ favorites.paginator.num_pages }}</span>
+            <span class="stat-label">Pages</span>
         </div>
     </div>
     
@@ -195,6 +257,30 @@
         </div>
         {% endfor %}
     </div>
+    
+    <!-- Pagination -->
+    {% if favorites.has_other_pages %}
+    <div class="pagination">
+        {% if favorites.has_previous %}
+            <a href="?page=1">« First</a>
+            <a href="?page={{ favorites.previous_page_number }}">‹ Previous</a>
+        {% endif %}
+        
+        {% for num in favorites.paginator.page_range %}
+            {% if favorites.number == num %}
+                <span class="current">{{ num }}</span>
+            {% elif num > favorites.number|add:'-3' and num < favorites.number|add:'3' %}
+                <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if favorites.has_next %}
+            <a href="?page={{ favorites.next_page_number }}">Next ›</a>
+            <a href="?page={{ favorites.paginator.num_pages }}">Last »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
     {% else %}
     <div class="empty-state">
         <div class="empty-state-icon">📚</div>
@@ -203,64 +289,4 @@
         <a href="{% url 'dictionary:dictionary' %}" class="btn">Search Words</a>
     </div>
     {% endif %}
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const removeButtons = document.querySelectorAll('.remove-btn');
-    
-    removeButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const word = this.getAttribute('data-word');
-            const card = this.closest('.favorite-card');
-            
-            if (confirm(`Remove "${word}" from favorites?`)) {
-                fetch('{% url "dictionary:remove_from_favorites" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: 'word=' + encodeURIComponent(word)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        card.style.animation = 'fadeOut 0.3s';
-                        setTimeout(() => {
-                            card.remove();
-                            
-                            // Check if no favorites left
-                            const remainingCards = document.querySelectorAll('.favorite-card');
-                            if (remainingCards.length === 0) {
-                                location.reload();
-                            }
-                        }, 300);
-                    } else {
-                        alert(data.error || 'Failed to remove favorite');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to remove favorite');
-                });
-            }
-        });
-    });
-});
-</script>
-
-<style>
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-}
-</style>
 {% endblock %}

@@ -179,6 +179,56 @@
         background: #357abd;
     }
     
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .pagination a,
+    .pagination span {
+        padding: 8px 15px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+    }
+    
+    .pagination a:hover {
+        background: #4a90e2;
+        color: white;
+        border-color: #4a90e2;
+    }
+    
+    .pagination .current {
+        background: #4a90e2;
+        color: white;
+        border-color: #4a90e2;
+    }
+    
+    body.dark-theme .history-section {
+        background: #2c3e50;
+    }
+    
+    body.dark-theme .history-word {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .history-item:hover {
+        background: #34495e;
+    }
+    
+    body.dark-theme .pagination a,
+    body.dark-theme .pagination span {
+        background: #34495e;
+        border-color: #4a5568;
+        color: #ecf0f1;
+    }
+    
     @media (max-width: 768px) {
         .content-grid {
             grid-template-columns: 1fr;
@@ -210,6 +260,29 @@
                 </li>
                 {% endfor %}
             </ul>
+            
+            <!-- Pagination -->
+            {% if history.has_other_pages %}
+            <div class="pagination">
+                {% if history.has_previous %}
+                    <a href="?page=1">« First</a>
+                    <a href="?page={{ history.previous_page_number }}">‹ Previous</a>
+                {% endif %}
+                
+                {% for num in history.paginator.page_range %}
+                    {% if history.number == num %}
+                        <span class="current">{{ num }}</span>
+                    {% elif num > history.number|add:'-3' and num < history.number|add:'3' %}
+                        <a href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if history.has_next %}
+                    <a href="?page={{ history.next_page_number }}">Next ›</a>
+                    <a href="?page={{ history.paginator.num_pages }}">Last »</a>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
         
         {% if popular_words %}

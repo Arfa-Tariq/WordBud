@@ -1,5 +1,6 @@
 """
 URL configuration for dictionary app.
+Clean, organized routes for all dictionary features.
 """
 
 from django.urls import path
@@ -22,6 +23,7 @@ urlpatterns = [
     # Search history
     path('history/', views.search_history, name='search_history'),
     
-    # API endpoints (unchanged)
+    # API endpoints (unchanged for backward compatibility)
     path('api/lookup/', views.api_word_lookup, name='api_word_lookup'),
-    path('api/word-of-day/', views.api_word_of_day, name='api_word_of_day'),]
+    path('api/word-of-day/', views.api_word_of_day, name='api_word_of_day'),
+]

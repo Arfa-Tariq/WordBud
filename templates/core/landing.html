@@ -1,10 +1,261 @@
 {% extends "base.html" %}
-{% block title %}Landing - WordBud{% endblock %}
+{% block title %}Welcome to WordBud - Your Personal Dictionary{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 20px;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 56px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .hero-subtitle {
+        font-size: 24px;
+        color: #7f8c8d;
+        margin-bottom: 40px;
+    }
+    
+    .cta-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 60px;
+    }
+    
+    .btn-large {
+        padding: 16px 40px;
+        font-size: 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-block;
+    }
+    
+    .btn-primary-large {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary-large:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn-secondary-large {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    
+    .btn-secondary-large:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        text-align: center;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .feature-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+    
+    .feature-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+    
+    .feature-desc {
+        color: #7f8c8d;
+        line-height: 1.6;
+    }
+    
+    .quick-search-section {
+        max-width: 700px;
+        margin: 60px auto;
+        padding: 40px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 16px;
+    }
+    
+    .quick-search-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .quick-search-form {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .quick-search-input {
+        flex: 1;
+        padding: 16px 24px;
+        font-size: 18px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        background: white;
+    }
+    
+    .quick-search-btn {
+        padding: 16px 32px;
+        font-size: 18px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .quick-search-btn:hover {
+        background: #5568d3;
+        transform: scale(1.05);
+    }
+    
+    body.dark-theme .hero-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    body.dark-theme .feature-card {
+        background: #2c3e50;
+        border: 1px solid #34495e;
+    }
+    
+    body.dark-theme .feature-title {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .quick-search-input {
+        background: #34495e;
+        border-color: #4a5568;
+        color: #ecf0f1;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 36px;
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+        }
+        
+        .quick-search-form {
+            flex-direction: column;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<h1>Welcome to WordBud</h1>
-<p>Your dictionary management system.</p>
-<a href="{% url 'accounts:login' %}">Login</a> | 
-<a href="{% url 'accounts:signup' %}">Sign Up</a>
+<div class="hero-section">
+    <h1 class="hero-title">📖 Welcome to WordBud</h1>
+    <p class="hero-subtitle">Your comprehensive dictionary companion for exploring words, meanings, and more!</p>
+    
+    <div class="cta-buttons">
+        <a href="{% url 'dictionary:dictionary' %}" class="btn-large btn-primary-large">🔍 Start Exploring</a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'accounts:signup' %}" class="btn-large btn-secondary-large">✨ Sign Up Free</a>
+        {% else %}
+        <a href="{% url 'core:home' %}" class="btn-large btn-secondary-large">🏠 Go to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
 
+<!-- Quick Search Section -->
+<div class="quick-search-section">
+    <h2 class="quick-search-title">Quick Word Search</h2>
+    <form method="get" action="{% url 'dictionary:search' %}" class="quick-search-form">
+        <input type="text" name="q" class="quick-search-input" placeholder="Type any word..." required>
+        <button type="submit" class="quick-search-btn">Search</button>
+    </form>
+</div>
+
+<!-- Features Grid -->
+<div class="features-grid">
+    <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3 class="feature-title">Comprehensive Definitions</h3>
+        <p class="feature-desc">Get detailed definitions, examples, and usage from Merriam-Webster's trusted dictionary.</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🔊</div>
+        <h3 class="feature-title">Audio Pronunciations</h3>
+        <p class="feature-desc">Listen to correct pronunciations and learn IPA phonetic symbols for every word.</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">📜</div>
+        <h3 class="feature-title">Word Etymology</h3>
+        <p class="feature-desc">Discover the fascinating origins and historical development of words.</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3 class="feature-title">Synonyms & Antonyms</h3>
+        <p class="feature-desc">Expand your vocabulary with related words, synonyms, and antonyms.</p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3 class="feature-title">Save Favorites</h3>
+        <p class="feature-desc">Create your personal word collection. <strong>Sign up required!</strong></p>
+    </div>
+    
+    <div class="feature-card">
+        <div class="feature-icon">🎲</div>
+        <h3 class="feature-title">Word of the Day</h3>
+        <p class="feature-desc">Learn a new word every day and build your vocabulary naturally.</p>
+    </div>
+</div>
 {% endblock %}

@@ -69,7 +69,7 @@
         .nav-menu {
             display: flex;
             list-style: none;
-            gap: 30px;
+            gap: 20px;
             align-items: center;
         }
         
@@ -200,6 +200,7 @@
                 padding: 20px;
                 box-shadow: 0 4px 10px rgba(0,0,0,0.1);
                 display: none;
+                gap: 10px;
             }
             
             .nav-menu.active {
@@ -223,7 +224,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{% url 'dictionary:dictionary' %}" class="logo">
+            <a href="{% url 'core:landing' %}" class="logo">
                 <span class="logo-icon">📖</span>
                 <span>WordBud</span>
             </a>
@@ -231,15 +232,21 @@
             <button class="mobile-toggle" id="mobileToggle">☰</button>
             
             <ul class="nav-menu" id="navMenu">
-                <li><a href="{% url 'dictionary:dictionary' %}" class="nav-link">🏠 Dictionary</a></li>
+                <li><a href="{% url 'dictionary:dictionary' %}" class="nav-link">🔍 Dictionary</a></li>
                 <li><a href="{% url 'dictionary:random_word' %}" class="nav-link">🎲 Random</a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'dictionary:favorites_list' %}" class="nav-link">⭐ Favorites</a></li>
                     <li><a href="{% url 'dictionary:search_history' %}" class="nav-link">🕒 History</a></li>
-                    <li><a href="{% url 'core:home' %}" class="nav-link">🚪 Logout</a></li>
+                    <li><a href="{% url 'accounts:profile' %}" class="nav-link">👤 Profile</a></li>
+                    <li>
+                        <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; font: inherit;">🚪 Logout</button>
+                        </form>
+                    </li>
                 {% else %}
                     <li><a href="{% url 'accounts:login' %}" class="nav-link">🔐 Login</a></li>
-                    <li><a href="{% url 'accounts:signup' %}" class="nav-link">📝 Register</a></li>
+                    <li><a href="{% url 'accounts:signup' %}" class="nav-link">📝 Sign Up</a></li>
                 {% endif %}
                 <li>
                     <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
@@ -259,7 +266,7 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-text">
-                © 2025 WordBud. Powered by Merriam-Webster API.
+                © {{ now.year }} WordBud. Powered by Merriam-Webster API.
             </div>
             <div class="footer-links">
                 <a href="#" class="footer-link">About</a>
