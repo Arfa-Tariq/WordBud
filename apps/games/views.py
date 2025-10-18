@@ -1,21 +1,19 @@
-import os
+from django.shortcuts import render
 import random
 import requests
-from django.shortcuts import render
+from django.conf import settings
+import os
 from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# 🔑 Merriam-Webster API setup
+# Merriam-Webster API details
 API_KEY = os.getenv("MERRIAM_WEBSTER_API_KEY")
 BASE_URL = "https://www.dictionaryapi.com/api/v3/references/collegiate/json"
 
-# A small pool of fallback words
+# Small pool of common words — can be replaced with DB or Random Word API later
 COMMON_WORDS = [
     "python", "django", "variable", "function", "template",
     "computer", "network", "language", "education", "science"
 ]
+
 
 def get_valid_word():
     """
@@ -28,23 +26,20 @@ def get_valid_word():
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
                 data = response.json()
-                # Merriam-Webster returns a list with entries for valid words
                 if isinstance(data, list) and len(data) > 0 and "meta" in data[0]:
                     return word.lower()
         except Exception as e:
             print("API error:", e)
             break
 
-    # fallback in case API or env fails
+    # fallback if API fails
     return random.choice(COMMON_WORDS)
 
 
-def word_game(request):
+def word_guess(request):
     """
-    Word Guess Game using Merriam-Webster API verified words.
+    Word Guess Game (like Hangman) — uses Merriam-Webster API validated words.
     """
-
-    # Start new game if none exists
     if 'game' not in request.session:
         word = get_valid_word()
         request.session['game'] = {
@@ -59,7 +54,6 @@ def word_game(request):
     attempts = game['attempts']
     message = ""
 
-    # Handle POST (user guess)
     if request.method == "POST":
         guess = request.POST.get('guess', '').lower()
 
@@ -71,7 +65,7 @@ def word_game(request):
             else:
                 message = f"✅ Good job! '{guess}' is in the word."
 
-            # Update session
+            # update session
             request.session['game'] = {
                 'word': word,
                 'guessed': guessed,
@@ -79,10 +73,10 @@ def word_game(request):
             }
 
     display_word = " ".join([c if c in guessed else "_" for c in word])
+
     won = "_" not in display_word
     lost = attempts <= 0
 
-    # End of game
     if won or lost:
         final_message = "🎉 You won!" if won else f"❌ You lost! The word was '{word}'."
         request.session.pop('game', None)
@@ -93,10 +87,37 @@ def word_game(request):
             'game_over': True
         })
 
-    # Render game in progress
-    return render(request, "games/word_game.html", {
+    return render(request, "games/word_guess.html", {
         'display_word': display_word,
         'attempts': attempts,
         'message': message,
         'game_over': False
     })
+# -----------------------------
+# GAME 2: WORD SCRAMBLE (prototype)
+# -----------------------------
+def word_scramble(request):
+    pass
+
+# -----------------------------
+# GAME 3: SYNONYM MATCH (prototype)
+# -----------------------------
+def synonym_match(request):
+    pass
+
+
+# -----------------------------
+# GAME 4: WORD MEANING QUIZ (prototype)
+# -----------------------------
+def meaning_quiz(request):
+    pass
+
+def game_hub(request):
+    """Main hub to display all available games."""
+    games = [
+        {"name": "Word Guess", "url": "games:word_guess", "desc": "Guess the hidden word before you run out of attempts!"},
+        {"name": "Word Scramble", "url": "games:word_scramble", "desc": "Unscramble the letters to find the correct word."},
+        {"name": "Synonym Match", "url": "games:synonym_match", "desc": "Find the correct synonym for the given word."},
+        {"name": "Word Meaning Quiz", "url": "games:meaning_quiz", "desc": "Choose the correct definition of a given word."},
+    ]
+    return render(request, "games/game_hub.html", {"games": games})
