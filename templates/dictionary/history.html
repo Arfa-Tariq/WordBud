@@ -1,13 +1,240 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search History – WordBud{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #4a90e2;
+    }
+    
+    .page-header h1 {
+        font-size: 36px;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .page-header p {
+        color: #7f8c8d;
+        margin-top: 10px;
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+    }
+    
+    .history-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .history-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .history-item {
+        padding: 15px;
+        border-bottom: 1px solid #ecf0f1;
+        transition: background 0.2s;
+    }
+    
+    .history-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .history-item:last-child {
+        border-bottom: none;
+    }
+    
+    .history-word {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+    
+    .history-word:hover {
+        color: #4a90e2;
+    }
+    
+    .history-date {
+        font-size: 13px;
+        color: #95a5a6;
+    }
+    
+    .popular-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 25px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        height: fit-content;
+    }
+    
+    .popular-section .section-title {
+        color: white;
+        border-bottom-color: rgba(255,255,255,0.3);
+    }
+    
+    .popular-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .popular-item {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .popular-item:last-child {
+        border-bottom: none;
+    }
+    
+    .popular-word {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 16px;
+        transition: opacity 0.2s;
+    }
+    
+    .popular-word:hover {
+        opacity: 0.8;
+    }
+    
+    .popular-count {
+        background: rgba(255,255,255,0.2);
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-top: 30px;
+    }
+    
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h2 {
+        color: #7f8c8d;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state p {
+        color: #95a5a6;
+        margin-bottom: 25px;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #4a90e2;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+    
+    .btn:hover {
+        background: #357abd;
+    }
+    
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Search History</h2>
-{% if history %}
-  <ul>
-    {% for entry in history %}
-      <li>{{ entry.word }} - {{ entry.searched_at|date:"Y-m-d H:i" }}</li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No searches yet.</p>
-{% endif %}
+<div class="history-container">
+    <div class="page-header">
+        <h1>🕒 Search History</h1>
+        <p>Your recent word searches</p>
+    </div>
+    
+    {% if history %}
+    <div class="content-grid">
+        <div class="history-section">
+            <h2 class="section-title">Recent Searches</h2>
+            <ul class="history-list">
+                {% for entry in history %}
+                <li class="history-item">
+                    <a href="{% url 'dictionary:search' %}?q={{ entry.word }}" class="history-word">
+                        {{ entry.word|title }}
+                    </a>
+                    <div class="history-date">
+                        {{ entry.searched_at|date:"M d, Y - g:i A" }}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        {% if popular_words %}
+        <div class="popular-section">
+            <h2 class="section-title">Most Searched</h2>
+            <ul class="popular-list">
+                {% for item in popular_words %}
+                <li class="popular-item">
+                    <a href="{% url 'dictionary:search' %}?q={{ item.word }}" class="popular-word">
+                        {{ item.word|title }}
+                    </a>
+                    <span class="popular-count">{{ item.count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h2>No search history yet</h2>
+        <p>Start exploring words to build your search history!</p>
+        <a href="{% url 'dictionary:dictionary' %}" class="btn">Start Searching</a>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

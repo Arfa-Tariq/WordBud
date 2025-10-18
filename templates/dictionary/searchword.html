@@ -1,54 +1,622 @@
 {% extends 'base.html' %}
-{% block title %}{{ word|title }} – WordBud{% endblock %}
+{% load static %}
+
+{% block title %}{% if word %}{{ word|title }} – {% endif %}WordBud Dictionary{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .search-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .search-form input[type="text"] {
+        flex: 1;
+        min-width: 250px;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        transition: border-color 0.3s;
+    }
+    
+    .search-form input[type="text"]:focus {
+        outline: none;
+        border-color: #4a90e2;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: #4a90e2;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #357abd;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    .btn-favorite {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-favorite:hover {
+        background: #218838;
+    }
+    
+    .btn-favorite.active {
+        background: #dc3545;
+    }
+    
+    .btn-favorite.active:hover {
+        background: #c82333;
+    }
+    
+    .word-of-day {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .word-of-day h3 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+    }
+    
+    .word-of-day p {
+        margin: 10px 0;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .suggestions {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .suggestions a {
+        display: inline-block;
+        margin: 5px 10px 5px 0;
+        padding: 8px 15px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+    }
+    
+    .suggestions a:hover {
+        background: #4a90e2;
+        color: white;
+        border-color: #4a90e2;
+    }
+    
+    .word-entry {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .word-header {
+        border-bottom: 2px solid #4a90e2;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .word-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .word-pos {
+        font-size: 18px;
+        color: #7f8c8d;
+        font-style: italic;
+    }
+    
+    .pronunciation {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .pronunciation-text {
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        color: #495057;
+        margin: 5px 0;
+    }
+    
+    .audio-player {
+        margin-top: 10px;
+    }
+    
+    .audio-player audio {
+        width: 100%;
+        max-width: 400px;
+        height: 40px;
+    }
+    
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 25px 0 15px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .definitions-list {
+        list-style: none;
+        padding: 0;
+        counter-reset: definition-counter;
+    }
+    
+    .definitions-list li {
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 15px;
+        line-height: 1.7;
+        counter-increment: definition-counter;
+    }
+    
+    .definitions-list li:before {
+        content: counter(definition-counter);
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: #4a90e2;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .examples-list {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #4a90e2;
+        margin: 15px 0;
+    }
+    
+    .examples-list li {
+        margin-bottom: 12px;
+        line-height: 1.6;
+        color: #495057;
+    }
+    
+    .examples-list em {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .etymology-box {
+        background: #fff3e0;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #ff9800;
+        margin: 15px 0;
+    }
+    
+    .etymology-box p {
+        margin: 0;
+        line-height: 1.7;
+    }
+    
+    .thesaurus-section {
+        background: #e8f5e9;
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 30px;
+    }
+    
+    .thesaurus-section h3 {
+        color: #2e7d32;
+        margin-top: 0;
+    }
+    
+    .word-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .word-tag {
+        display: inline-block;
+        padding: 6px 14px;
+        background: white;
+        border: 1px solid #c8e6c9;
+        border-radius: 20px;
+        font-size: 14px;
+        color: #2e7d32;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    
+    .word-tag:hover {
+        background: #2e7d32;
+        color: white;
+        border-color: #2e7d32;
+    }
+    
+    .antonyms-section {
+        background: #ffebee;
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+    }
+    
+    .antonyms-section h3 {
+        color: #c62828;
+        margin-top: 0;
+    }
+    
+    .antonyms-section .word-tag {
+        border-color: #ffcdd2;
+        color: #c62828;
+    }
+    
+    .antonyms-section .word-tag:hover {
+        background: #c62828;
+        color: white;
+        border-color: #c62828;
+    }
+    
+    .tabs {
+        display: flex;
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 20px;
+        gap: 5px;
+    }
+    
+    .tab {
+        padding: 12px 24px;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        font-weight: 500;
+        color: #7f8c8d;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .tab:hover {
+        color: #4a90e2;
+    }
+    
+    .tab.active {
+        color: #4a90e2;
+        border-bottom-color: #4a90e2;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Dark theme support */
+    @media (prefers-color-scheme: dark) {
+        .word-entry {
+            background: #2c3e50;
+            border-color: #34495e;
+        }
+        
+        .word-title {
+            color: #ecf0f1;
+        }
+        
+        .pronunciation {
+            background: #34495e;
+        }
+        
+        .examples-list {
+            background: #34495e;
+        }
+        
+        .search-form input[type="text"] {
+            background: #34495e;
+            border-color: #4a5568;
+            color: #ecf0f1;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .search-form {
+            flex-direction: column;
+        }
+        
+        .search-form input[type="text"],
+        .btn {
+            width: 100%;
+        }
+        
+        .word-title {
+            font-size: 28px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<form method="get" action="{% url 'dictionary:search' %}">
-  <input type="text" name="q" placeholder="Search a word..." value="{{ word }}">
-  <button type="submit">Search</button>
-  <a href="{% url 'dictionary:random_word' %}">Random Word</a>
-</form>
+<div class="search-container">
+    <!-- Search Form -->
+    <form method="get" action="{% url 'dictionary:search' %}" class="search-form">
+        <input type="text" name="q" placeholder="Search for any word..." value="{{ word }}" required autofocus>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="{% url 'dictionary:random_word' %}" class="btn btn-secondary">Random Word</a>
+        {% if user.is_authenticated and word and results %}
+            <button type="button" id="favoriteBtn" class="btn btn-favorite {% if is_favorite %}active{% endif %}">
+                {% if is_favorite %}★ Remove from Favorites{% else %}☆ Add to Favorites{% endif %}
+            </button>
+        {% endif %}
+    </form>
 
-{% if word_of_day %}
-<div>
-  <h3>🌤 Word of the Day: {{ word_of_day.word }}</h3>
-  <p>{{ word_of_day.definition }}</p>
-  <small>{{ word_of_day.date }}</small>
-</div>
-{% endif %}
+    <!-- Word of the Day -->
+    {% if word_of_day and not word %}
+    <div class="word-of-day">
+        <h3>🌟 Word of the Day: <strong>{{ word_of_day.word|title }}</strong></h3>
+        <p><em>{{ word_of_day.part_of_speech }}</em></p>
+        <p>{{ word_of_day.definition }}</p>
+        <small>{{ word_of_day.date }}</small>
+    </div>
+    {% endif %}
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+    <!-- Error Messages -->
+    {% if error %}
+    <div class="error-message">
+        <strong>{{ error }}</strong>
+    </div>
+    {% endif %}
 
-{% for entry in results %}
-<div>
-  <h4>{{ entry.word }} ({{ entry.part_of_speech }})</h4>
-  <ul>
-    {% for d in entry.definitions %}<li>{{ d }}</li>{% endfor %}
-  </ul>
-  {% if entry.examples %}
-    <strong>Examples:</strong>
-    <ul>{% for ex in entry.examples %}<li>{{ ex|safe }}</li>{% endfor %}</ul>
-  {% endif %}
-  {% if entry.etymology %}
-    <strong>Etymology:</strong>
-    <p>{{ entry.etymology }}</p>
-  {% endif %}
-  {% if entry.audio %}
-    <strong>Audio:</strong>
-    {% for a in entry.audio %}
-      <audio controls><source src="{{ a }}" type="audio/mpeg"></audio>
+    <!-- Spelling Suggestions -->
+    {% if suggestions %}
+    <div class="suggestions">
+        <strong>Suggestions:</strong><br>
+        {% for suggestion in suggestions %}
+            <a href="?q={{ suggestion }}">{{ suggestion }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Word Results -->
+    {% for entry in results %}
+    <div class="word-entry">
+        <!-- Word Header -->
+        <div class="word-header">
+            <div>
+                <h1 class="word-title">{{ entry.word }}</h1>
+                {% if entry.part_of_speech %}
+                <span class="word-pos">{{ entry.part_of_speech }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tabs for organized content -->
+        <div class="tabs">
+            <button class="tab active" data-tab="definitions-{{ forloop.counter }}">Definitions</button>
+            {% if entry.examples %}<button class="tab" data-tab="examples-{{ forloop.counter }}">Examples</button>{% endif %}
+            {% if entry.pronunciations or entry.audio %}<button class="tab" data-tab="pronunciation-{{ forloop.counter }}">Pronunciation</button>{% endif %}
+            {% if entry.etymology %}<button class="tab" data-tab="etymology-{{ forloop.counter }}">Etymology</button>{% endif %}
+        </div>
+
+        <!-- Definitions Tab -->
+        <div id="definitions-{{ forloop.counter }}" class="tab-content active">
+            <h3 class="section-title">Definitions</h3>
+            <ol class="definitions-list">
+                {% for definition in entry.definitions %}
+                <li>{{ definition|safe }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        <!-- Examples Tab -->
+        {% if entry.examples %}
+        <div id="examples-{{ forloop.counter }}" class="tab-content">
+            <h3 class="section-title">Usage Examples</h3>
+            <ul class="examples-list">
+                {% for example in entry.examples %}
+                <li>{{ example|safe }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Pronunciation Tab -->
+        {% if entry.pronunciations or entry.audio %}
+        <div id="pronunciation-{{ forloop.counter }}" class="tab-content">
+            <h3 class="section-title">Pronunciation</h3>
+            <div class="pronunciation">
+                {% for pron in entry.pronunciations %}
+                    {% if pron.ipa %}
+                    <div class="pronunciation-text">
+                        <strong>IPA:</strong> /{{ pron.ipa }}/
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if entry.audio %}
+                <div class="audio-player">
+                    <strong>Listen:</strong><br>
+                    {% for audio_url in entry.audio %}
+                    <audio controls>
+                        <source src="{{ audio_url }}" type="audio/mpeg">
+                        Your browser does not support audio playback.
+                    </audio>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Etymology Tab -->
+        {% if entry.etymology %}
+        <div id="etymology-{{ forloop.counter }}" class="tab-content">
+            <h3 class="section-title">Etymology</h3>
+            <div class="etymology-box">
+                {% for etym in entry.etymology %}
+                <p>{{ etym|safe }}</p>
+                {% endfor %}
+            </div>
+            {% if entry.date %}
+            <p><strong>First Known Use:</strong> {{ entry.date|safe }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
     {% endfor %}
-  {% endif %}
-{% endfor %}
 
-{% if thesaurus.synonyms %}
-<h4>Synonyms:</h4>
-<p>{{ thesaurus.synonyms|join:", " }}</p>
-{% endif %}
-{% if thesaurus.antonyms %}
-<h4>Antonyms:</h4>
-<p>{{ thesaurus.antonyms|join:", " }}</p>
-{% endif %}
+    <!-- Thesaurus Section -->
+    {% if thesaurus.synonyms or thesaurus.antonyms %}
+    <div class="thesaurus-section">
+        {% if thesaurus.synonyms %}
+        <h3>📚 Synonyms</h3>
+        <div class="word-tags">
+            {% for syn in thesaurus.synonyms %}
+            <a href="?q={{ syn }}" class="word-tag">{{ syn }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
 
+    {% if thesaurus.antonyms %}
+    <div class="antonyms-section">
+        <h3>🔄 Antonyms</h3>
+        <div class="word-tags">
+            {% for ant in thesaurus.antonyms %}
+            <a href="?q={{ ant }}" class="word-tag">{{ ant }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+// Tab switching functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-tab');
+            const parent = this.closest('.word-entry');
+            
+            // Remove active class from all tabs and contents in this entry
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+    
+    // Favorite button functionality
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    if (favoriteBtn) {
+        favoriteBtn.addEventListener('click', function() {
+            const isFavorite = this.classList.contains('active');
+            const word = '{{ word|escapejs }}';
+            const url = isFavorite ? '{% url "dictionary:remove_from_favorites" %}' : '{% url "dictionary:add_to_favorites" %}';
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'word=' + encodeURIComponent(word)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.classList.toggle('active');
+                    if (isFavorite) {
+                        this.innerHTML = '☆ Add to Favorites';
+                    } else {
+                        this.innerHTML = '★ Remove from Favorites';
+                    }
+                } else {
+                    alert(data.error || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update favorites');
+            });
+        });
+    }
+});
+</script>
 {% endblock %}
