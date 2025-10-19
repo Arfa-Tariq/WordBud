@@ -163,7 +163,7 @@
     <p class="attempts">Attempts left: <strong>{{ attempts }}</strong></p>
     {% else %}
     <p class="game-over">{{ message }}</p>
-    <a href="{% url 'games:word_game' %}" class="restart-btn">🔁 Play Again</a>
+    <a href="{% url 'games:word_guess' %}" class="restart-btn">🔁 Play Again</a>
     {% endif %}
 </div>
 {% endblock %}
