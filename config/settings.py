@@ -125,6 +125,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+# Create media directory structure
+import os
+os.makedirs(MEDIA_ROOT / 'profile_images', exist_ok=True)
+
+# File Upload Settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -194,3 +201,6 @@ if not os.path.exists(LOGS_DIR):
 # Dictionary API Configuration
 DICTIONARY_API_TIMEOUT = 10  # seconds
 RANDOM_WORD_API_TIMEOUT = 5  # seconds
+
+
+

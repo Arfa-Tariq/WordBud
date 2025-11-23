@@ -1,40 +1,657 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Preferences – WordBud{% endblock %}
 
-{% block content %}
-<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
-    <h1 style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">⚙️ Preferences</h1>
-    <p style="color: #7f8c8d; margin-bottom: 30px;">Customize your WordBud experience</p>
+{% block extra_css %}
+<style>
+    .preferences-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
     
-    <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-        <form method="post">
-            {% csrf_token %}
-            
-            {% for field in form %}
-                <div style="margin-bottom: 30px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 10px;">
-                        {{ field.label }}
-                    </label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <p style="font-size: 13px; color: #95a5a6; margin-top: 5px;">{{ field.help_text }}</p>
-                    {% endif %}
-                    {% if field.errors %}
-                        <p style="color: #e74c3c; font-size: 13px; margin-top: 5px;">{{ field.errors.0 }}</p>
-                    {% endif %}
+    .page-header {
+        margin-bottom: 30px;
+    }
+    
+    .page-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .page-subtitle {
+        color: #7f8c8d;
+        font-size: 18px;
+    }
+    
+    .preferences-card {
+        background: white;
+        border-radius: 16px;
+        padding: 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .preference-section {
+        padding: 35px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .preference-section:last-child {
+        border-bottom: none;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+    
+    .section-info {
+        flex: 1;
+    }
+    
+    .section-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 5px 0;
+    }
+    
+    .section-description {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin: 0;
+    }
+    
+    /* Theme Selection */
+    .theme-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .theme-option {
+        position: relative;
+    }
+    
+    .theme-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .theme-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: white;
+    }
+    
+    .theme-option input[type="radio"]:checked + .theme-card {
+        border-color: #667eea;
+        background: #f0f4ff;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .theme-card:hover {
+        border-color: #667eea;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .theme-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .theme-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+    
+    .theme-desc {
+        font-size: 13px;
+        color: #7f8c8d;
+        text-align: center;
+    }
+    
+    /* Toggle Switches */
+    .preference-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        transition: all 0.3s;
+    }
+    
+    .preference-item:hover {
+        background: #f0f2f5;
+        transform: translateX(5px);
+    }
+    
+    .preference-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .preference-info {
+        flex: 1;
+    }
+    
+    .preference-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+    .preference-help {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin: 0;
+    }
+    
+    /* Custom Toggle Switch */
+    .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 34px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+    
+    /* Number Input */
+    .number-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .number-input {
+        width: 100px;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s;
+    }
+    
+    .number-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .number-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .number-btn {
+        width: 30px;
+        height: 30px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .number-btn:hover {
+        background: #5568d3;
+        transform: scale(1.1);
+    }
+    
+    /* Messages */
+    .alert {
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #c3e6cb;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+    }
+    
+    .alert-icon {
+        font-size: 24px;
+    }
+    
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        padding: 35px;
+        background: #f8f9fa;
+        border-top: 2px solid #e0e0e0;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 14px 32px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        flex: 1;
+        justify-content: center;
+        min-width: 200px;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #7f8c8d;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .btn-secondary:hover {
+        background: #f8f9fa;
+        border-color: #bdc3c7;
+    }
+    
+    /* Dark Theme */
+    body.dark-theme .page-title {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .preferences-card {
+        background: #2c3e50;
+    }
+    
+    body.dark-theme .preference-section {
+        border-bottom-color: #34495e;
+    }
+    
+    body.dark-theme .section-title {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .theme-card {
+        background: #34495e;
+        border-color: #4a5568;
+    }
+    
+    body.dark-theme .theme-option input[type="radio"]:checked + .theme-card {
+        background: #3a4a5e;
+        border-color: #667eea;
+    }
+    
+    body.dark-theme .theme-name {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .preference-item {
+        background: #34495e;
+    }
+    
+    body.dark-theme .preference-item:hover {
+        background: #3a4a5e;
+    }
+    
+    body.dark-theme .preference-label {
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .number-input {
+        background: #34495e;
+        border-color: #4a5568;
+        color: #ecf0f1;
+    }
+    
+    body.dark-theme .form-actions {
+        background: #34495e;
+        border-top-color: #4a5568;
+    }
+    
+    @media (max-width: 768px) {
+        .preferences-container {
+            padding: 15px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+        }
+        
+        .preference-section {
+            padding: 25px;
+        }
+        
+        .theme-options {
+            grid-template-columns: 1fr;
+        }
+        
+        .preference-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            padding: 25px;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="preferences-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <span>⚙️</span>
+            Preferences
+        </h1>
+        <p class="page-subtitle">Customize your WordBud experience</p>
+    </div>
+    
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <span class="alert-icon">
+                    {% if message.tags == 'success' %}✓{% else %}⚠️{% endif %}
+                </span>
+                <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Preferences Form -->
+    <form method="post" id="preferencesForm">
+        {% csrf_token %}
+        
+        <div class="preferences-card">
+            <!-- Theme Section -->
+            <div class="preference-section">
+                <div class="section-header">
+                    <div class="section-icon">🎨</div>
+                    <div class="section-info">
+                        <h2 class="section-title">Appearance</h2>
+                        <p class="section-description">Choose your preferred theme and visual style</p>
+                    </div>
                 </div>
-            {% endfor %}
+                
+                <div class="theme-options">
+                    {% for value, label in form.theme.field.choices %}
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="{{ value }}" 
+                               {% if form.theme.value == value %}checked{% endif %}>
+                        <div class="theme-card">
+                            <div class="theme-icon">
+                                {% if value == 'light' %}☀️
+                                {% elif value == 'dark' %}🌙
+                                {% else %}💫{% endif %}
+                            </div>
+                            <div class="theme-name">{{ label }}</div>
+                            <div class="theme-desc">
+                                {% if value == 'light' %}Bright and clean
+                                {% elif value == 'dark' %}Easy on the eyes
+                                {% else %}Follows system{% endif %}
+                            </div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                
+                {% if form.theme.help_text %}
+                    <p class="preference-help" style="margin-top: 15px;">{{ form.theme.help_text }}</p>
+                {% endif %}
+            </div>
             
-            <div style="display: flex; gap: 15px; padding-top: 20px; border-top: 2px solid #f0f0f0; margin-top: 20px;">
-                <button type="submit" style="padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                    💾 Save Preferences
+            <!-- Notifications Section -->
+            <div class="preference-section">
+                <div class="section-header">
+                    <div class="section-icon">📧</div>
+                    <div class="section-info">
+                        <h2 class="section-title">Notifications</h2>
+                        <p class="section-description">Manage how we communicate with you</p>
+                    </div>
+                </div>
+                
+                <div class="preference-item">
+                    <div class="preference-info">
+                        <label class="preference-label" for="id_email_notifications">
+                            Email Notifications
+                        </label>
+                        <p class="preference-help">
+                            Receive important updates and announcements via email
+                        </p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="email_notifications" id="id_email_notifications"
+                               {% if form.email_notifications.value %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Privacy Section -->
+            <div class="preference-section">
+                <div class="section-header">
+                    <div class="section-icon">🔒</div>
+                    <div class="section-info">
+                        <h2 class="section-title">Privacy</h2>
+                        <p class="section-description">Control your data and activity tracking</p>
+                    </div>
+                </div>
+                
+                <div class="preference-item">
+                    <div class="preference-info">
+                        <label class="preference-label" for="id_show_search_history">
+                            Search History
+                        </label>
+                        <p class="preference-help">
+                            Save and display your word search history
+                        </p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="show_search_history" id="id_show_search_history"
+                               {% if form.show_search_history.value %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Display Section -->
+            <div class="preference-section">
+                <div class="section-header">
+                    <div class="section-icon">📊</div>
+                    <div class="section-info">
+                        <h2 class="section-title">Display</h2>
+                        <p class="section-description">Customize how content is displayed</p>
+                    </div>
+                </div>
+                
+                <div class="preference-item">
+                    <div class="preference-info">
+                        <label class="preference-label" for="id_items_per_page">
+                            Items Per Page
+                        </label>
+                        <p class="preference-help">
+                            Number of items to show in lists and tables (10-100)
+                        </p>
+                    </div>
+                    <div class="number-input-wrapper">
+                        <input type="number" name="items_per_page" id="id_items_per_page" 
+                               class="number-input"
+                               value="{{ form.items_per_page.value|default:20 }}"
+                               min="10" max="100" step="10">
+                        <div class="number-controls">
+                            <button type="button" class="number-btn" onclick="adjustNumber(10)">▲</button>
+                            <button type="button" class="number-btn" onclick="adjustNumber(-10)">▼</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span>💾</span>
+                    Save Preferences
                 </button>
-                <a href="{% url 'accounts:profile' %}" style="padding: 14px 32px; background: white; color: #7f8c8d; border: 2px solid #e0e0e0; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block;">
-                    ❌ Cancel
+                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                    Cancel
                 </a>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Number input controls
+    window.adjustNumber = function(delta) {
+        const input = document.getElementById('id_items_per_page');
+        let value = parseInt(input.value) || 20;
+        value += delta;
+        
+        // Clamp between min and max
+        value = Math.max(10, Math.min(100, value));
+        input.value = value;
+    };
+    
+    // Theme preview (optional - shows immediate effect)
+    const themeInputs = document.querySelectorAll('input[name="theme"]');
+    themeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Optional: Preview theme without saving
+            // You can add preview logic here if desired
+        });
+    });
+    
+    // Form validation
+    const form = document.getElementById('preferencesForm');
+    form.addEventListener('submit', function(e) {
+        const itemsInput = document.getElementById('id_items_per_page');
+        const value = parseInt(itemsInput.value);
+        
+        if (value < 10 || value > 100) {
+            e.preventDefault();
+            alert('Items per page must be between 10 and 100');
+            itemsInput.focus();
+        }
+    });
+});
+</script>
 {% endblock %}
