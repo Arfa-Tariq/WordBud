@@ -8,7 +8,8 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.db.models import Count
 from .models import CustomUser
-
+# apps/accounts/admin.py
+from django.utils.html import format_html
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -63,7 +64,14 @@ class CustomUserAdmin(UserAdmin):
     )
     
     readonly_fields = ('last_login',)
+    list_display = ('email', 'get_full_name', 'profile_image_thumbnail', 'is_active', 'date_joined')
     
+    def profile_image_thumbnail(self, obj):
+        if obj.profile_image:
+            return format_html('<img src="{}" style="width: 50px; height: 50px; border-radius: 50%;" />', obj.profile_image.url)
+        return '—'
+    profile_image_thumbnail.short_description = 'Profile Picture'
+
     def activity_summary(self, obj):
         """Display user activity summary with links."""
         
@@ -153,3 +161,4 @@ class CustomUserAdmin(UserAdmin):
                 months = diff.days // 30
                 time_str = f'{months}mo ago'
                 color = 'red'
+
