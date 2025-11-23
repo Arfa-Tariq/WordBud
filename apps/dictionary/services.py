@@ -341,7 +341,7 @@ def get_word_of_the_day() -> Dict[str, Any]:
     
     # Try to get a dynamic word from Random Word API first
     try:
-        response = requests.get(RANDOM_WORD_API, timeout=5)
+        response = requests.get(f"{RANDOM_WORD_API}&seed={today}", timeout=5)
         if response.status_code == 200:
             words = response.json()
             if words and isinstance(words, list):
