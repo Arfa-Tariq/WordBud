@@ -13,6 +13,11 @@
     overflow: hidden;
   }
   
+  /* Dark mode hero - more subtle, darker gradient */
+  html[data-theme="dark"] .hero-section {
+    background: linear-gradient(135deg, #1a2a4e 0%, #2d1f2e 50%, #3a3a2a 100%);
+  }
+  
   .hero-section::before {
     content: '';
     position: absolute;
@@ -58,11 +63,23 @@
     background-clip: text;
   }
   
+  /* Better gradient text for dark mode */
+  html[data-theme="dark"] .hero-text .gradient-text {
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
   .hero-text p {
     font-size: 1.25rem;
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: var(--wb-spacing-2xl);
     line-height: 1.6;
+  }
+  
+  html[data-theme="dark"] .hero-text p {
+    color: rgba(255, 255, 255, 0.8);
   }
   
   .hero-cta {
@@ -79,6 +96,11 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   }
   
+  html[data-theme="dark"] .hero-cta .wb-btn-primary {
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+    color: white;
+  }
+  
   .hero-cta .wb-btn-primary:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
@@ -92,9 +114,19 @@
     font-size: 1.125rem;
   }
   
+  html[data-theme="dark"] .hero-cta .wb-btn-outline {
+    border-color: var(--wb-blue);
+    color: var(--wb-blue);
+  }
+  
   .hero-cta .wb-btn-outline:hover {
     background: white;
     color: var(--wb-blue);
+  }
+  
+  html[data-theme="dark"] .hero-cta .wb-btn-outline:hover {
+    background: var(--wb-blue);
+    color: white;
   }
   
   .hero-visual {
@@ -109,6 +141,11 @@
     padding: var(--wb-spacing-lg);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     animation: float-card 4s ease-in-out infinite;
+  }
+  
+  html[data-theme="dark"] .floating-card {
+    background: var(--wb-bg-secondary);
+    border: 1px solid var(--wb-border);
   }
   
   @keyframes float-card {
@@ -268,6 +305,13 @@
     overflow: hidden;
   }
   
+  /* Dark mode stats - subtle dark gradient with brand colors */
+  html[data-theme="dark"] .stats-section {
+    background: linear-gradient(135deg, #1a2a3a 0%, #2a1f2f 100%);
+    border-top: 1px solid var(--wb-border);
+    border-bottom: 1px solid var(--wb-border);
+  }
+  
   .stats-section::before {
     content: '';
     position: absolute;
@@ -277,6 +321,10 @@
     height: 500px;
     background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
     animation: float 20s ease-in-out infinite;
+  }
+  
+  html[data-theme="dark"] .stats-section::before {
+    background: radial-gradient(circle, rgba(137, 191, 254, 0.05) 0%, transparent 70%);
   }
   
   .stats-grid {
@@ -296,6 +344,13 @@
     font-weight: bold;
     color: var(--wb-text-primary);
     margin-bottom: var(--wb-spacing-xs);
+  }
+  
+  html[data-theme="dark"] .stat-number {
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   .stat-label {
@@ -320,6 +375,12 @@
     color: white;
   }
   
+  /* Dark mode CTA - darker gradient with better contrast */
+  html[data-theme="dark"] .cta-card {
+    background: linear-gradient(135deg, #1e3a5f 0%, #3a2a4a 100%);
+    border: 1px solid var(--wb-border);
+  }
+  
   .cta-card::before {
     content: '';
     position: absolute;
@@ -331,12 +392,17 @@
     animation: float 15s ease-in-out infinite;
   }
   
+  html[data-theme="dark"] .cta-card::before {
+    background: radial-gradient(circle, rgba(137, 191, 254, 0.1) 0%, transparent 70%);
+  }
+  
   .cta-card h2 {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: var(--wb-spacing-md);
     position: relative;
     z-index: 1;
+    color: white;
   }
   
   .cta-card p {
@@ -345,6 +411,7 @@
     opacity: 0.9;
     position: relative;
     z-index: 1;
+    color: white;
   }
   
   .cta-card .wb-btn-primary {
@@ -354,6 +421,16 @@
     font-size: 1.125rem;
     position: relative;
     z-index: 1;
+  }
+  
+  html[data-theme="dark"] .cta-card .wb-btn-primary {
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+    color: white;
+  }
+  
+  html[data-theme="dark"] .cta-card .wb-btn-primary:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 20px 50px rgba(137, 191, 254, 0.3);
   }
   
   /* Responsive */

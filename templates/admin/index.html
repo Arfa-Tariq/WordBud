@@ -1,26 +1,77 @@
-{% extends "admin/index.html" %}
+{% extends "admin/base_site.html" %}
 {% load static %}
 
 {% block content %}
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-    <h1 style="margin: 0 0 15px 0; font-size: 36px;">📊 Welcome to WordBud Admin</h1>
-    <p style="margin: 0 0 20px 0; font-size: 18px; opacity: 0.95;">Manage your dictionary platform, monitor analytics, and oversee user activity.</p>
+<style>
+    /* Hide the default app list completely */
+    #content-main .app-dashboard,
+    #content-main > .module,
+    .app-accounts,
+    .app-auth,
+    .app-core,
+    .app-dictionary {
+        display: none !important;
+    }
+</style>
+<div class="wb-admin-welcome">
+    <div class="wb-welcome-header">
+        <h1>WordBud Administration</h1>
+        <p>Manage your dictionary platform and monitor user activity</p>
+    </div>
     
-    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-        <a href="{% url 'admin_dashboard' %}" style="background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
-            📈 View Analytics Dashboard
+    <div class="wb-quick-actions">
+        <a href="{% url 'admin_dashboard' %}" class="wb-action-card wb-action-primary">
+            <div class="wb-action-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="20" x2="12" y2="10"></line>
+                    <line x1="18" y1="20" x2="18" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="16"></line>
+                </svg>
+            </div>
+            <div class="wb-action-content">
+                <h3>Analytics Dashboard</h3>
+                <p>View comprehensive analytics and insights</p>
+            </div>
         </a>
         
-        <a href="{% url 'admin:core_searchlog_changelist' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
-            🔍 Search Logs
+        <a href="{% url 'admin:accounts_customuser_changelist' %}" class="wb-action-card">
+            <div class="wb-action-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <div class="wb-action-content">
+                <h3>User Management</h3>
+                <p>Manage user accounts and permissions</p>
+            </div>
         </a>
         
-        <a href="{% url 'admin:core_translationlog_changelist' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
-            🌐 Translation Logs
+        <a href="{% url 'admin:core_searchlog_changelist' %}" class="wb-action-card">
+            <div class="wb-action-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </div>
+            <div class="wb-action-content">
+                <h3>Search Activity</h3>
+                <p>Monitor dictionary search logs</p>
+            </div>
         </a>
         
-        <a href="{% url 'admin:accounts_customuser_changelist' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.3s;">
-            👥 Manage Users
+        <a href="{% url 'admin:dictionary_userfavorite_changelist' %}" class="wb-action-card">
+            <div class="wb-action-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+            </div>
+            <div class="wb-action-content">
+                <h3>User Favorites</h3>
+                <p>View most favorited words</p>
+            </div>
         </a>
     </div>
 </div>
@@ -28,11 +79,134 @@
 {{ block.super }}
 
 <style>
-    a[href*="admin_dashboard"]:hover,
-    a[href*="searchlog"]:hover,
-    a[href*="translationlog"]:hover,
-    a[href*="customuser"]:hover {
-        transform: translateY(-2px);
+    .wb-admin-welcome {
+        margin-bottom: 30px;
+    }
+    
+    .wb-welcome-header {
+        background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+        color: white;
+        padding: 40px;
+        border-radius: var(--wb-radius-lg);
+        margin-bottom: 30px;
+        box-shadow: var(--wb-shadow-lg);
+    }
+    
+    .wb-welcome-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .wb-welcome-header p {
+        margin: 0;
+        font-size: 16px;
+        opacity: 0.95;
+        color: white;
+    }
+    
+    .wb-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .wb-action-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        background: white;
+        border: 1px solid var(--wb-border);
+        border-radius: var(--wb-radius-md);
+        padding: 24px;
+        text-decoration: none;
+        transition: all var(--wb-transition-base);
+        box-shadow: var(--wb-shadow-sm);
+    }
+    
+    .wb-action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--wb-shadow-lg);
+        border-color: var(--wb-blue);
+    }
+    
+    .wb-action-card.wb-action-primary {
+        background: linear-gradient(135deg, rgba(137, 191, 254, 0.1), rgba(247, 142, 108, 0.1));
+        border-color: var(--wb-blue);
+    }
+    
+    .wb-action-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--wb-bg-secondary);
+        border-radius: var(--wb-radius-md);
+        color: var(--wb-blue);
+        transition: all var(--wb-transition-base);
+    }
+    
+    .wb-action-card:hover .wb-action-icon {
+        background: var(--wb-blue);
+        color: white;
+    }
+    
+    .wb-action-content h3 {
+        margin: 0 0 6px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--wb-text-primary);
+    }
+    
+    .wb-action-content p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--wb-text-secondary);
+        line-height: 1.5;
+    }
+    
+    @media (max-width: 768px) {
+        .wb-quick-actions {
+            grid-template-columns: 1fr;
+        }
+        
+        .wb-welcome-header {
+            padding: 30px 20px;
+        }
+        
+        .wb-welcome-header h1 {
+            font-size: 24px;
+        }
+    }
+    
+    /* === DARK MODE FIXES === */
+    html[data-theme="dark"] .wb-action-card {
+        background: var(--wb-bg-secondary);
+        border-color: var(--wb-border);
+    }
+    
+    html[data-theme="dark"] .wb-action-card.wb-action-primary {
+        background: rgba(137, 191, 254, 0.1);
+        border-color: var(--wb-blue);
+    }
+    
+    html[data-theme="dark"] .wb-action-icon {
+        background: var(--wb-bg-tertiary);
+    }
+    
+    html[data-theme="dark"] .wb-action-card:hover {
+        border-color: var(--wb-blue);
+    }
+    
+    html[data-theme="dark"] .wb-action-content h3 {
+        color: var(--wb-text-primary);
+    }
+    
+    html[data-theme="dark"] .wb-action-content p {
+        color: var(--wb-text-secondary);
     }
 </style>
 {% endblock %}

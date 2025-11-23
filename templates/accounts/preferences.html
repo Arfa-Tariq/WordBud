@@ -1,3 +1,4 @@
+<!-- preferences.html -->
 {% extends "base.html" %}
 {% load static %}
 
@@ -8,39 +9,41 @@
     .preferences-container {
         max-width: 900px;
         margin: 0 auto;
-        padding: 20px;
+        padding: var(--wb-spacing-xl);
     }
     
     .page-header {
-        margin-bottom: 30px;
+        margin-bottom: var(--wb-spacing-2xl);
+        text-align: center;
     }
     
     .page-title {
-        font-size: 36px;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 10px;
+        font-size: var(--wb-text-4xl);
+        font-weight: var(--wb-font-bold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-sm);
         display: flex;
         align-items: center;
-        gap: 15px;
+        justify-content: center;
+        gap: var(--wb-spacing-md);
     }
     
     .page-subtitle {
-        color: #7f8c8d;
-        font-size: 18px;
+        color: var(--wb-text-secondary);
+        font-size: var(--wb-text-lg);
     }
     
     .preferences-card {
-        background: white;
-        border-radius: 16px;
-        padding: 0;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        background: var(--wb-bg-primary);
+        border-radius: var(--wb-radius-xl);
+        box-shadow: var(--wb-shadow-lg);
+        border: 1px solid var(--wb-border);
         overflow: hidden;
     }
     
     .preference-section {
-        padding: 35px;
-        border-bottom: 2px solid #f0f0f0;
+        padding: var(--wb-spacing-3xl);
+        border-bottom: 2px solid var(--wb-border);
     }
     
     .preference-section:last-child {
@@ -50,20 +53,21 @@
     .section-header {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 25px;
+        gap: var(--wb-spacing-lg);
+        margin-bottom: var(--wb-spacing-2xl);
     }
     
     .section-icon {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+        border-radius: var(--wb-radius-lg);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: var(--wb-text-2xl);
         color: white;
+        flex-shrink: 0;
     }
     
     .section-info {
@@ -71,24 +75,24 @@
     }
     
     .section-title {
-        font-size: 22px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0 0 5px 0;
+        font-size: var(--wb-text-2xl);
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin: 0 0 var(--wb-spacing-xs) 0;
     }
     
     .section-description {
-        font-size: 14px;
-        color: #7f8c8d;
+        font-size: var(--wb-text-base);
+        color: var(--wb-text-secondary);
         margin: 0;
     }
     
     /* Theme Selection */
     .theme-options {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--wb-spacing-lg);
+        margin-top: var(--wb-spacing-lg);
     }
     
     .theme-option {
@@ -105,41 +109,41 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 20px;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
+        padding: var(--wb-spacing-xl);
+        border: 2px solid var(--wb-border);
+        border-radius: var(--wb-radius-lg);
         cursor: pointer;
-        transition: all 0.3s;
-        background: white;
+        transition: all var(--wb-transition-base);
+        background: var(--wb-bg-primary);
+        text-align: center;
     }
     
     .theme-option input[type="radio"]:checked + .theme-card {
-        border-color: #667eea;
-        background: #f0f4ff;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        border-color: var(--wb-blue);
+        background: rgba(137, 191, 254, 0.05);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
     }
     
     .theme-card:hover {
-        border-color: #667eea;
+        border-color: var(--wb-blue);
         transform: translateY(-3px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: var(--wb-shadow-md);
     }
     
     .theme-icon {
-        font-size: 36px;
-        margin-bottom: 10px;
+        font-size: var(--wb-text-3xl);
+        margin-bottom: var(--wb-spacing-md);
     }
     
     .theme-name {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 5px;
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-xs);
     }
     
     .theme-desc {
-        font-size: 13px;
-        color: #7f8c8d;
-        text-align: center;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-secondary);
     }
     
     /* Toggle Switches */
@@ -147,15 +151,15 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        margin-bottom: 15px;
-        transition: all 0.3s;
+        padding: var(--wb-spacing-lg);
+        background: var(--wb-bg-secondary);
+        border-radius: var(--wb-radius-lg);
+        margin-bottom: var(--wb-spacing-md);
+        transition: all var(--wb-transition-base);
     }
     
     .preference-item:hover {
-        background: #f0f2f5;
+        background: var(--wb-bg-tertiary);
         transform: translateX(5px);
     }
     
@@ -168,15 +172,15 @@
     }
     
     .preference-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 5px;
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-xs);
         display: block;
     }
     
     .preference-help {
-        font-size: 13px;
-        color: #7f8c8d;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-secondary);
         margin: 0;
     }
     
@@ -200,8 +204,8 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: #ccc;
-        transition: 0.4s;
+        background: var(--wb-border);
+        transition: var(--wb-transition-base);
         border-radius: 34px;
     }
     
@@ -213,12 +217,12 @@
         left: 4px;
         bottom: 4px;
         background: white;
-        transition: 0.4s;
+        transition: var(--wb-transition-base);
         border-radius: 50%;
     }
     
     .toggle-switch input:checked + .toggle-slider {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
     }
     
     .toggle-switch input:checked + .toggle-slider:before {
@@ -229,205 +233,98 @@
     .number-input-wrapper {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: var(--wb-spacing-md);
     }
     
     .number-input {
         width: 100px;
-        padding: 12px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
+        padding: var(--wb-spacing-md);
+        border: 2px solid var(--wb-border);
+        border-radius: var(--wb-radius-md);
+        font-size: var(--wb-text-base);
+        font-weight: var(--wb-font-semibold);
         text-align: center;
-        transition: all 0.3s;
+        transition: all var(--wb-transition-base);
+        background: var(--wb-bg-primary);
+        color: var(--wb-text-primary);
     }
     
     .number-input:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: var(--wb-blue);
+        box-shadow: 0 0 0 3px rgba(137, 191, 254, 0.2);
     }
     
     .number-controls {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: var(--wb-spacing-xs);
     }
     
     .number-btn {
-        width: 30px;
-        height: 30px;
-        background: #667eea;
+        width: 32px;
+        height: 32px;
+        background: var(--wb-blue);
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: var(--wb-radius-md);
         cursor: pointer;
-        font-size: 16px;
+        font-size: var(--wb-text-base);
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s;
+        transition: all var(--wb-transition-base);
     }
     
     .number-btn:hover {
-        background: #5568d3;
+        background: #7aa8e0;
         transform: scale(1.1);
     }
     
     /* Messages */
     .alert {
-        padding: 15px 20px;
-        border-radius: 12px;
-        margin-bottom: 25px;
+        padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+        border-radius: var(--wb-radius-md);
+        margin-bottom: var(--wb-spacing-lg);
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-weight: 500;
-        animation: slideDown 0.3s ease-out;
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        gap: var(--wb-spacing-sm);
+        border-left: 4px solid;
     }
     
     .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border: 2px solid #c3e6cb;
+        background-color: rgba(167, 205, 90, 0.1);
+        border-color: var(--wb-lime);
+        color: var(--wb-lime);
     }
     
     .alert-error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 2px solid #f5c6cb;
-    }
-    
-    .alert-icon {
-        font-size: 24px;
+        background-color: rgba(202, 92, 75, 0.1);
+        border-color: var(--wb-rust);
+        color: var(--wb-rust);
     }
     
     /* Form Actions */
     .form-actions {
         display: flex;
-        gap: 15px;
-        padding: 35px;
-        background: #f8f9fa;
-        border-top: 2px solid #e0e0e0;
+        gap: var(--wb-spacing-md);
+        padding: var(--wb-spacing-3xl);
+        background: var(--wb-bg-secondary);
+        border-top: 2px solid var(--wb-border);
         flex-wrap: wrap;
-    }
-    
-    .btn {
-        padding: 14px 32px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 16px;
-        transition: all 0.3s;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        flex: 1;
-        justify-content: center;
-        min-width: 200px;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    }
-    
-    .btn-secondary {
-        background: white;
-        color: #7f8c8d;
-        border: 2px solid #e0e0e0;
-    }
-    
-    .btn-secondary:hover {
-        background: #f8f9fa;
-        border-color: #bdc3c7;
-    }
-    
-    /* Dark Theme */
-    body.dark-theme .page-title {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .preferences-card {
-        background: #2c3e50;
-    }
-    
-    body.dark-theme .preference-section {
-        border-bottom-color: #34495e;
-    }
-    
-    body.dark-theme .section-title {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .theme-card {
-        background: #34495e;
-        border-color: #4a5568;
-    }
-    
-    body.dark-theme .theme-option input[type="radio"]:checked + .theme-card {
-        background: #3a4a5e;
-        border-color: #667eea;
-    }
-    
-    body.dark-theme .theme-name {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .preference-item {
-        background: #34495e;
-    }
-    
-    body.dark-theme .preference-item:hover {
-        background: #3a4a5e;
-    }
-    
-    body.dark-theme .preference-label {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .number-input {
-        background: #34495e;
-        border-color: #4a5568;
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .form-actions {
-        background: #34495e;
-        border-top-color: #4a5568;
     }
     
     @media (max-width: 768px) {
         .preferences-container {
-            padding: 15px;
+            padding: var(--wb-spacing-md);
         }
         
         .page-title {
-            font-size: 28px;
+            font-size: var(--wb-text-3xl);
         }
         
         .preference-section {
-            padding: 25px;
+            padding: var(--wb-spacing-xl);
         }
         
         .theme-options {
@@ -437,17 +334,12 @@
         .preference-item {
             flex-direction: column;
             align-items: flex-start;
-            gap: 15px;
+            gap: var(--wb-spacing-md);
         }
         
         .form-actions {
             flex-direction: column;
-            padding: 25px;
-        }
-        
-        .btn {
-            width: 100%;
-            justify-content: center;
+            padding: var(--wb-spacing-xl);
         }
     }
 </style>
@@ -468,9 +360,7 @@
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">
-                <span class="alert-icon">
-                    {% if message.tags == 'success' %}✓{% else %}⚠️{% endif %}
-                </span>
+                <span>{% if message.tags == 'success' %}✓{% else %}⚠️{% endif %}</span>
                 <span>{{ message }}</span>
             </div>
         {% endfor %}
@@ -480,7 +370,7 @@
     <form method="post" id="preferencesForm">
         {% csrf_token %}
         
-        <div class="preferences-card">
+        <div class="preferences-card wb-slide-up">
             <!-- Theme Section -->
             <div class="preference-section">
                 <div class="section-header">
@@ -514,7 +404,7 @@
                 </div>
                 
                 {% if form.theme.help_text %}
-                    <p class="preference-help" style="margin-top: 15px;">{{ form.theme.help_text }}</p>
+                    <p class="preference-help" style="margin-top: var(--wb-spacing-md);">{{ form.theme.help_text }}</p>
                 {% endif %}
             </div>
             
@@ -606,11 +496,11 @@
             
             <!-- Form Actions -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="wb-btn wb-btn-primary">
                     <span>💾</span>
                     Save Preferences
                 </button>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <a href="{% url 'accounts:profile' %}" class="wb-btn wb-btn-secondary">
                     Cancel
                 </a>
             </div>
@@ -648,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (value < 10 || value > 100) {
             e.preventDefault();
-            alert('Items per page must be between 10 and 100');
+            WB.showToast('Items per page must be between 10 and 100', 'error');
             itemsInput.focus();
         }
     });

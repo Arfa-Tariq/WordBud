@@ -24,20 +24,23 @@
 <!-- Navigation -->
 <nav class="wb-navbar">
     <div class="wb-navbar-container">
-        <a href="{% url 'core:landing' %}" class="wb-navbar-logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 4L4 10L16 16L28 10L16 4Z" fill="url(#logo-gradient)"/>
-                <path d="M4 16L16 22L28 16" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round"/>
-                <path d="M4 22L16 28L28 22" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round"/>
-                <defs>
-                    <linearGradient id="logo-gradient" x1="4" y1="4" x2="28" y2="28">
-                        <stop stop-color="#89BFFE"/>
-                        <stop offset="1" stop-color="#F78E6C"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-            <span>WORDBUD</span>
-        </a>
+    <a href="{% if user.is_authenticated %}{% url 'core:home' %}{% else %}{% url 'core:landing' %}{% endif %}"
+       class="wb-navbar-logo">
+
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 4L4 10L16 16L28 10L16 4Z" fill="url(#logo-gradient)"/>
+            <path d="M4 16L16 22L28 16" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M4 22L16 28L28 22" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+                <linearGradient id="logo-gradient" x1="4" y1="4" x2="28" y2="28">
+                    <stop stop-color="#89BFFE"/>
+                    <stop offset="1" stop-color="#F78E6C"/>
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <span>WORDBUD</span>
+    </a>
         
         <button class="wb-mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
@@ -145,6 +148,12 @@
                     <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Privacy Policy</a></li>
                     <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Terms of Service</a></li>
                     <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Contact</a></li>
+                    {% if user.is_staff %}
+                    <li><a href="/admin/" class="wb-text-secondary wb-text-sm hover:wb-text-coral" style="transition: color 0.2s;">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" style="display: inline; margin-right: 4px; vertical-align: middle;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                        Admin
+                    </a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -161,7 +170,7 @@
 </footer>
 
 <!-- Core JS -->
-<script src="{% static 'js/theme.js' %}"></script>
+<script src="{% static 'js/theme-toggle.js' %}"></script>
 <script src="{% static 'js/ui.js' %}"></script>
 
 {% block extra_js %}{% endblock %}

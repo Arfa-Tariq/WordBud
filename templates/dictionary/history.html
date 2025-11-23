@@ -1,313 +1,441 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Search History – WordBud{% endblock %}
+{% block title %}Search History — WordBud{% endblock %}
 
 {% block extra_css %}
 <style>
-    .history-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 20px;
+  /* Hero Section */
+  .history-hero {
+    background: linear-gradient(135deg, #A7CD5A, #FFD93D);
+    color: #1A1D29;
+    padding: var(--wb-spacing-3xl) 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .history-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
+    animation: wb-float 20s ease-in-out infinite;
+  }
+
+  @keyframes wb-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-30px, 30px) scale(1.1); }
+  }
+
+  .history-hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .history-hero h1 {
+    font-size: var(--wb-text-5xl);
+    font-weight: var(--wb-font-bold);
+    margin-bottom: var(--wb-spacing-sm);
+    color: #1A1D29;
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.4);
+  }
+
+  .history-hero p {
+    font-size: var(--wb-text-lg);
+    opacity: 0.95;
+    color: #1A1D29;
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Dark mode adjustments */
+  html[data-theme="dark"] .history-hero {
+    background: linear-gradient(135deg, #8FB848, #E8C028);
+  }
+
+  html[data-theme="dark"] .history-hero h1,
+  html[data-theme="dark"] .history-hero p {
+    color: #1A1D29;
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.5);
+  }
+
+  /* Main Layout */
+  .history-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--wb-spacing-2xl);
+    margin-top: var(--wb-spacing-2xl);
+  }
+
+  /* History List Section */
+  .history-section {
+    background: var(--wb-bg-primary);
+    border: 1px solid var(--wb-border);
+    border-radius: var(--wb-radius-lg);
+    padding: var(--wb-spacing-xl);
+    animation: wb-fade-in 0.5s ease-out;
+  }
+
+  .section-title {
+    font-size: var(--wb-text-2xl);
+    font-weight: var(--wb-font-bold);
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-lg);
+    padding-bottom: var(--wb-spacing-md);
+    border-bottom: 2px solid var(--wb-border);
+    display: flex;
+    align-items: center;
+    gap: var(--wb-spacing-sm);
+  }
+
+  .history-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .history-item {
+    padding: var(--wb-spacing-lg);
+    border-bottom: 1px solid var(--wb-border);
+    transition: all var(--wb-transition-fast);
+  }
+
+  .history-item:last-child {
+    border-bottom: none;
+  }
+
+  .history-item:hover {
+    background: var(--wb-bg-secondary);
+    padding-left: calc(var(--wb-spacing-lg) + var(--wb-spacing-sm));
+  }
+
+  .history-word-link {
+    font-size: var(--wb-text-lg);
+    font-weight: var(--wb-font-semibold);
+    color: var(--wb-text-primary);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: var(--wb-spacing-xs);
+    transition: color var(--wb-transition-fast);
+  }
+
+  .history-word-link:hover {
+    color: var(--wb-blue);
+  }
+
+  .history-date {
+    font-size: var(--wb-text-sm);
+    color: var(--wb-text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: var(--wb-spacing-xs);
+  }
+
+  /* Popular Words Sidebar */
+  .popular-section {
+    background: linear-gradient(135deg, #6FA3E8, #E87A5C);
+    border-radius: var(--wb-radius-lg);
+    padding: var(--wb-spacing-xl);
+    color: white;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+    animation: wb-scale-in 0.5s ease-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .popular-section .section-title {
+    color: white;
+    border-bottom-color: rgba(255, 255, 255, 0.25);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .popular-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .popular-item {
+    padding: var(--wb-spacing-md) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--wb-spacing-md);
+  }
+
+  .popular-item:last-child {
+    border-bottom: none;
+  }
+
+  .popular-word-link {
+    color: white;
+    text-decoration: none;
+    font-weight: var(--wb-font-medium);
+    flex: 1;
+    transition: opacity var(--wb-transition-fast);
+  }
+
+  .popular-word-link:hover {
+    opacity: 0.8;
+  }
+
+  .popular-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: var(--wb-spacing-xs) var(--wb-spacing-sm);
+    border-radius: var(--wb-radius-full);
+    font-size: var(--wb-text-xs);
+    font-weight: var(--wb-font-bold);
+    flex-shrink: 0;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: var(--wb-spacing-3xl) var(--wb-spacing-lg);
+    background: var(--wb-bg-secondary);
+    border-radius: var(--wb-radius-lg);
+    grid-column: 1 / -1;
+    animation: wb-fade-in 0.5s ease-out;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--wb-spacing-lg);
+    display: inline-block;
+  }
+
+  .empty-state h2 {
+    font-size: var(--wb-text-2xl);
+    font-weight: var(--wb-font-bold);
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-sm);
+  }
+
+  .empty-state p {
+    font-size: var(--wb-text-base);
+    color: var(--wb-text-secondary);
+    margin-bottom: var(--wb-spacing-xl);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Pagination */
+  .history-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--wb-spacing-sm);
+    flex-wrap: wrap;
+    margin-top: var(--wb-spacing-2xl);
+  }
+
+  .pagination-link,
+  .pagination-current,
+  .pagination-ellipsis {
+    padding: var(--wb-spacing-sm) var(--wb-spacing-md);
+    border-radius: var(--wb-radius-md);
+    font-size: var(--wb-text-sm);
+    font-weight: var(--wb-font-medium);
+    text-decoration: none;
+    transition: all var(--wb-transition-fast);
+  }
+
+  .pagination-link {
+    background: var(--wb-bg-secondary);
+    color: var(--wb-text-primary);
+    border: 1px solid var(--wb-border);
+  }
+
+  .pagination-link:hover {
+    background: var(--wb-lime);
+    color: white;
+    border-color: var(--wb-lime);
+    transform: translateY(-2px);
+  }
+
+  .pagination-current {
+    background: linear-gradient(135deg, var(--wb-lime), var(--wb-yellow));
+    color: white;
+    font-weight: var(--wb-font-bold);
+  }
+
+  .pagination-ellipsis {
+    color: var(--wb-text-tertiary);
+    cursor: default;
+  }
+
+  /* Filter & Sort Bar */
+  .history-filter {
+    background: var(--wb-bg-secondary);
+    border-radius: var(--wb-radius-lg);
+    padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+    margin-bottom: var(--wb-spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--wb-spacing-md);
+  }
+
+  .filter-label {
+    font-size: var(--wb-text-sm);
+    font-weight: var(--wb-font-medium);
+    color: var(--wb-text-secondary);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .history-layout {
+      grid-template-columns: 1fr;
     }
-    
-    .page-header {
-        margin-bottom: 30px;
-        padding-bottom: 15px;
-        border-bottom: 3px solid #4a90e2;
-    }
-    
-    .page-header h1 {
-        font-size: 36px;
-        color: #2c3e50;
-        margin: 0;
-    }
-    
-    .page-header p {
-        color: #7f8c8d;
-        margin-top: 10px;
-    }
-    
-    .content-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 30px;
-        margin-top: 30px;
-    }
-    
-    .history-section {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    
-    .section-title {
-        font-size: 22px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0 0 20px 0;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #ecf0f1;
-    }
-    
-    .history-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .history-item {
-        padding: 15px;
-        border-bottom: 1px solid #ecf0f1;
-        transition: background 0.2s;
-    }
-    
-    .history-item:hover {
-        background: #f8f9fa;
-    }
-    
-    .history-item:last-child {
-        border-bottom: none;
-    }
-    
-    .history-word {
-        font-size: 18px;
-        font-weight: 600;
-        color: #2c3e50;
-        text-decoration: none;
-        display: inline-block;
-        margin-bottom: 5px;
-    }
-    
-    .history-word:hover {
-        color: #4a90e2;
-    }
-    
-    .history-date {
-        font-size: 13px;
-        color: #95a5a6;
-    }
-    
+
     .popular-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
-        padding: 25px;
-        color: white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        height: fit-content;
+      position: relative;
+      top: 0;
     }
-    
-    .popular-section .section-title {
-        color: white;
-        border-bottom-color: rgba(255,255,255,0.3);
+  }
+
+  @media (max-width: 768px) {
+    .history-hero h1 {
+      font-size: var(--wb-text-3xl);
     }
-    
-    .popular-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+
+    .history-item {
+      padding: var(--wb-spacing-md);
     }
-    
-    .popular-item {
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+
+    .section-title {
+      font-size: var(--wb-text-xl);
     }
-    
-    .popular-item:last-child {
-        border-bottom: none;
+
+    .history-filter {
+      flex-direction: column;
+      align-items: stretch;
     }
-    
-    .popular-word {
-        color: white;
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 16px;
-        transition: opacity 0.2s;
-    }
-    
-    .popular-word:hover {
-        opacity: 0.8;
-    }
-    
-    .popular-count {
-        background: rgba(255,255,255,0.2);
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: bold;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        margin-top: 30px;
-    }
-    
-    .empty-state-icon {
-        font-size: 64px;
-        margin-bottom: 20px;
-    }
-    
-    .empty-state h2 {
-        color: #7f8c8d;
-        margin-bottom: 15px;
-    }
-    
-    .empty-state p {
-        color: #95a5a6;
-        margin-bottom: 25px;
-    }
-    
-    .btn {
-        display: inline-block;
-        padding: 12px 30px;
-        background: #4a90e2;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: background 0.3s;
-    }
-    
-    .btn:hover {
-        background: #357abd;
-    }
-    
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 30px;
-        flex-wrap: wrap;
-    }
-    
-    .pagination a,
-    .pagination span {
-        padding: 8px 15px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        text-decoration: none;
-        color: #333;
-        transition: all 0.2s;
-    }
-    
-    .pagination a:hover {
-        background: #4a90e2;
-        color: white;
-        border-color: #4a90e2;
-    }
-    
-    .pagination .current {
-        background: #4a90e2;
-        color: white;
-        border-color: #4a90e2;
-    }
-    
-    body.dark-theme .history-section {
-        background: #2c3e50;
-    }
-    
-    body.dark-theme .history-word {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .history-item:hover {
-        background: #34495e;
-    }
-    
-    body.dark-theme .pagination a,
-    body.dark-theme .pagination span {
-        background: #34495e;
-        border-color: #4a5568;
-        color: #ecf0f1;
-    }
-    
-    @media (max-width: 768px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="history-container">
-    <div class="page-header">
-        <h1>🕒 Search History</h1>
-        <p>Your recent word searches</p>
+<!-- Hero Section -->
+<section class="history-hero wb-fade-in">
+  <div class="wb-container">
+    <div class="history-hero-content">
+      <h1>🕓 Search History</h1>
+      <p>Track your learning journey and revisit your favorite discoveries</p>
     </div>
-    
-    {% if history %}
-    <div class="content-grid">
-        <div class="history-section">
-            <h2 class="section-title">Recent Searches</h2>
-            <ul class="history-list">
-                {% for entry in history %}
-                <li class="history-item">
-                    <a href="{% url 'dictionary:search' %}?q={{ entry.word }}" class="history-word">
-                        {{ entry.word|title }}
-                    </a>
-                    <div class="history-date">
-                        {{ entry.searched_at|date:"M d, Y - g:i A" }}
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-            
-            <!-- Pagination -->
-            {% if history.has_other_pages %}
-            <div class="pagination">
-                {% if history.has_previous %}
-                    <a href="?page=1">« First</a>
-                    <a href="?page={{ history.previous_page_number }}">‹ Previous</a>
-                {% endif %}
-                
-                {% for num in history.paginator.page_range %}
-                    {% if history.number == num %}
-                        <span class="current">{{ num }}</span>
-                    {% elif num > history.number|add:'-3' and num < history.number|add:'3' %}
-                        <a href="?page={{ num }}">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if history.has_next %}
-                    <a href="?page={{ history.next_page_number }}">Next ›</a>
-                    <a href="?page={{ history.paginator.num_pages }}">Last »</a>
-                {% endif %}
+  </div>
+</section>
+
+<div class="wb-container wb-py-3xl">
+  {% if history %}
+    <!-- Filter Bar -->
+    <div class="history-filter wb-slide-up">
+      <span class="filter-label">
+        Showing <strong>{{ history|length }}</strong> of <strong>{{ history.paginator.count }}</strong> searches
+      </span>
+      <a href="{% url 'dictionary:dictionary' %}" class="wb-btn wb-btn-ghost wb-btn-sm">
+        New Search
+      </a>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="history-layout">
+      <!-- Recent Searches -->
+      <div class="history-section wb-slide-up">
+        <h2 class="section-title">
+          <span>📖</span>
+          <span>Recent Searches</span>
+        </h2>
+        <ul class="history-list">
+          {% for entry in history %}
+          <li class="history-item">
+            <a href="{% url 'dictionary:search' %}?q={{ entry.word }}" class="history-word-link">
+              {{ entry.word|title }}
+            </a>
+            <div class="history-date">
+              <span>⏰</span>
+              <span>{{ entry.searched_at|date:"M d, Y — g:i A" }}</span>
             </div>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <!-- Pagination -->
+        {% if history.has_other_pages %}
+        <div class="history-pagination wb-slide-up">
+          {% if history.has_previous %}
+            <a href="?page=1" class="pagination-link" title="First page">« First</a>
+            <a href="?page={{ history.previous_page_number }}" class="pagination-link" title="Previous page">‹ Prev</a>
+          {% endif %}
+
+          {% for num in history.paginator.page_range %}
+            {% if history.number == num %}
+              <span class="pagination-current" title="Current page">{{ num }}</span>
+            {% elif num > history.number|add:'-3' and num < history.number|add:'3' %}
+              <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% elif num == 1 or num == history.paginator.num_pages %}
+              <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% elif num == 2 or num == history.paginator.num_pages|add:'-1' %}
+              <span class="pagination-ellipsis">…</span>
             {% endif %}
-        </div>
-        
-        {% if popular_words %}
-        <div class="popular-section">
-            <h2 class="section-title">Most Searched</h2>
-            <ul class="popular-list">
-                {% for item in popular_words %}
-                <li class="popular-item">
-                    <a href="{% url 'dictionary:search' %}?q={{ item.word }}" class="popular-word">
-                        {{ item.word|title }}
-                    </a>
-                    <span class="popular-count">{{ item.count }}</span>
-                </li>
-                {% endfor %}
-            </ul>
+          {% endfor %}
+
+          {% if history.has_next %}
+            <a href="?page={{ history.next_page_number }}" class="pagination-link" title="Next page">Next ›</a>
+            <a href="?page={{ history.paginator.num_pages }}" class="pagination-link" title="Last page">Last »</a>
+          {% endif %}
         </div>
         {% endif %}
+      </div>
+
+      <!-- Most Searched Words -->
+      {% if popular_words %}
+      <div class="popular-section">
+        <h2 class="section-title">
+          <span>🔥</span>
+          <span>Most Searched</span>
+        </h2>
+        <ul class="popular-list">
+          {% for item in popular_words %}
+          <li class="popular-item">
+            <a href="{% url 'dictionary:search' %}?q={{ item.word }}" class="popular-word-link">
+              {{ item.word|title }}
+            </a>
+            <span class="popular-count">{{ item.count }}×</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon">🔍</div>
-        <h2>No search history yet</h2>
-        <p>Start exploring words to build your search history!</p>
-        <a href="{% url 'dictionary:dictionary' %}" class="btn">Start Searching</a>
+
+  {% else %}
+    <!-- Empty State -->
+    <div class="history-layout">
+      <div class="empty-state wb-fade-in">
+        <div class="empty-state-icon">🔭</div>
+        <h2>No History Yet</h2>
+        <p>Your search history will appear here as you explore words and discover new meanings. Start your learning journey today!</p>
+        <a href="{% url 'dictionary:dictionary' %}" class="wb-btn wb-btn-primary">
+          Start Exploring
+        </a>
+      </div>
     </div>
-    {% endif %}
+  {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add subtle animation to history items on load
+  const historyItems = document.querySelectorAll('.history-item');
+  historyItems.forEach((item, index) => {
+    item.style.animation = `wb-slide-up 0.5s ease-out ${index * 0.05}s both`;
+  });
+});
+</script>
 {% endblock %}
