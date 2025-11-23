@@ -1,333 +1,165 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}WordBud - Dictionary & Thesaurus{% endblock %}</title>
-    <meta name="description" content="WordBud - Your comprehensive online dictionary and thesaurus with definitions, synonyms, antonyms, and more.">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #667eea;
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --bg-light: #f8f9fa;
-            --border-color: #e0e0e0;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-dark);
-            background: var(--bg-light);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Navigation */
-        .navbar {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-        }
-        
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo-icon {
-            font-size: 32px;
-        }
-        
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 20px;
-            align-items: center;
-        }
-        
-        .nav-link {
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .nav-link:hover {
-            background: var(--bg-light);
-            color: var(--primary-color);
-        }
-        
-        .nav-link.active {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .theme-toggle {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.3s;
-        }
-        
-        .theme-toggle:hover {
-            background: var(--bg-light);
-        }
-        
-        .mobile-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-        }
-        
-        /* Main Content */
-        main {
-            flex: 1;
-            padding: 40px 20px;
-        }
-        
-        /* Footer */
-        .footer {
-            background: white;
-            border-top: 1px solid var(--border-color);
-            padding: 30px 20px;
-            margin-top: auto;
-        }
-        
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .footer-text {
-            color: var(--text-light);
-        }
-        
-        .footer-links {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .footer-link {
-            color: var(--text-light);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .footer-link:hover {
-            color: var(--primary-color);
-        }
-        
-        /* Dark Theme */
-        body.dark-theme {
-            --text-dark: #ecf0f1;
-            --text-light: #bdc3c7;
-            --bg-light: #1a1a2e;
-            --border-color: #34495e;
-            background: #0f0f23;
-            color: #ecf0f1;
-        }
-        
-        body.dark-theme .navbar,
-        body.dark-theme .footer {
-            background: #16213e;
-        }
-        
-        body.dark-theme .nav-link:hover {
-            background: #0f3460;
-        }
-        
-        body.dark-theme .theme-toggle:hover {
-            background: #0f3460;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .mobile-toggle {
-                display: block;
-            }
-            
-            .nav-menu {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                display: none;
-                gap: 10px;
-            }
-            
-            .nav-menu.active {
-                display: flex;
-            }
-            
-            body.dark-theme .nav-menu {
-                background: #16213e;
-            }
-            
-            .footer-container {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
-    
-    {% block extra_css %}{% endblock %}
+    <title>{% block title %}WordBud - Learn Better with a Buddy{% endblock %}</title>
+    <meta name="description" content="WordBud - Your comprehensive dictionary and language learning platform">
+<!-- Preload Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Core CSS (in order) -->
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/components.css' %}">
+<link rel="stylesheet" href="{% static 'css/animations.css' %}">
+<link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+
+{% block extra_css %}{% endblock %}
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{% url 'core:landing' %}" class="logo">
-                <span class="logo-icon">📖</span>
-                <span>WordBud</span>
-            </a>
-            
-            <button class="mobile-toggle" id="mobileToggle">☰</button>
-            
-            <!-- Replace the nav menu section in base.html with this: -->
-
-<ul class="nav-menu" id="navMenu">
-    <li><a href="{% url 'dictionary:dictionary' %}" class="nav-link">🔍 Dictionary</a></li>
-    <li><a href="{% url 'translator:translate' %}" class="nav-link">🌐 Translator</a></li>
-    <li><a href="{% url 'dictionary:random_word' %}" class="nav-link">🎲 Random</a></li>
-    <li><a href="{% url 'games:game_hub' %}" class="nav-link">🎮 Games</a></li>
-
-    {% if user.is_authenticated %}
-        <li><a href="{% url 'dictionary:favorites_list' %}" class="nav-link">⭐ Favorites</a></li>
-        <li><a href="{% url 'dictionary:search_history' %}" class="nav-link">🕒 History</a></li>
-        <li><a href="{% url 'accounts:profile' %}" class="nav-link">👤 Profile</a></li>
-        <li>
-            <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; font: inherit;">🚪 Logout</button>
-            </form>
-        </li>
-    {% else %}
-        <li><a href="{% url 'accounts:login' %}" class="nav-link">🔐 Login</a></li>
-        <li><a href="{% url 'accounts:signup' %}" class="nav-link">📝 Sign Up</a></li>
-    {% endif %}
-    <li>
-        <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
-            <span id="themeIcon">🌙</span>
+<body class="wb-min-h-screen wb-flex wb-flex-col">
+<!-- Navigation -->
+<nav class="wb-navbar">
+    <div class="wb-navbar-container">
+        <a href="{% url 'core:landing' %}" class="wb-navbar-logo">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 4L4 10L16 16L28 10L16 4Z" fill="url(#logo-gradient)"/>
+                <path d="M4 16L16 22L28 16" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 22L16 28L28 22" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                    <linearGradient id="logo-gradient" x1="4" y1="4" x2="28" y2="28">
+                        <stop stop-color="#89BFFE"/>
+                        <stop offset="1" stop-color="#F78E6C"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span>WORDBUD</span>
+        </a>
+        
+        <button class="wb-mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
         </button>
-    </li>
-</ul>
-        </div>
-    </nav>
-    
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-text">
-                © {{ now.year }} WordBud. Powered by Merriam-Webster API.
-            </div>
-            <div class="footer-links">
-                <a href="#" class="footer-link">About</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
-                <a href="#" class="footer-link">Contact</a>
-            </div>
-        </div>
-    </footer>
-    
-    <script>
-        // Mobile menu toggle
-        const mobileToggle = document.getElementById('mobileToggle');
-        const navMenu = document.getElementById('navMenu');
         
-        if (mobileToggle) {
-            mobileToggle.addEventListener('click', () => {
-                navMenu.classList.toggle('active');
-            });
-        }
-        
-        // Theme toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const body = document.body;
-        
-        // Check for saved theme preference
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        if (currentTheme === 'dark') {
-            body.classList.add('dark-theme');
-            themeIcon.textContent = '☀️';
-        }
-        
-        themeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-theme');
+        <ul class="wb-navbar-menu" id="navMenu">
+            <li><a href="{% url 'dictionary:dictionary' %}" class="wb-navbar-link">Dictionary</a></li>
+            <li><a href="{% url 'translator:translate' %}" class="wb-navbar-link">Translator</a></li>
             
-            if (body.classList.contains('dark-theme')) {
-                themeIcon.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeIcon.textContent = '🌙';
-                localStorage.setItem('theme', 'light');
-            }
-        });
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'dictionary:favorites_list' %}" class="wb-navbar-link">Favorites</a></li>
+                <li><a href="{% url 'dictionary:search_history' %}" class="wb-navbar-link">History</a></li>
+                <li><a href="{% url 'accounts:profile' %}" class="wb-navbar-link">
+                    <div class="wb-avatar wb-avatar-sm">
+                        {{ user.email.0|upper }}
+                    </div>
+                </a></li>
+                <li>
+                    <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="wb-btn wb-btn-ghost wb-btn-sm">Logout</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a href="{% url 'accounts:login' %}" class="wb-btn wb-btn-ghost wb-btn-sm">Login</a></li>
+                <li><a href="{% url 'accounts:signup' %}" class="wb-btn wb-btn-primary wb-btn-sm">Sign Up</a></li>
+            {% endif %}
+            
+            <li>
+                <button class="wb-btn wb-btn-ghost wb-btn-sm" id="themeToggle" aria-label="Toggle theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" id="themeIcon">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="wb-flex-1">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="wb-bg-secondary wb-border-t wb-mt-3xl">
+    <div class="wb-container wb-py-3xl">
+        <div class="wb-grid md:wb-grid-cols-4 wb-gap-xl">
+            <!-- Brand -->
+            <div class="md:wb-col-span-2">
+                <div class="wb-flex wb-items-center wb-gap-sm wb-mb-md">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 4L4 10L16 16L28 10L16 4Z" fill="url(#footer-gradient)"/>
+                        <path d="M4 16L16 22L28 16" stroke="url(#footer-gradient)" stroke-width="2"/>
+                        <path d="M4 22L16 28L28 22" stroke="url(#footer-gradient)" stroke-width="2"/>
+                        <defs>
+                            <linearGradient id="footer-gradient" x1="4" y1="4" x2="28" y2="28">
+                                <stop stop-color="#89BFFE"/>
+                                <stop offset="1" stop-color="#F78E6C"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="wb-font-bold wb-text-xl">WORDBUD</span>
+                </div>
+                <p class="wb-text-secondary wb-text-sm wb-mb-md" style="max-width: 320px;">
+                    Your personal language companion. Master vocabulary, explore definitions, and translate with ease. Learning's better with a buddy.
+                </p>
+                <div class="wb-flex wb-gap-md">
+                    <a href="#" class="wb-text-secondary hover:wb-text-blue" style="transition: color 0.2s;">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                    </a>
+                    <a href="#" class="wb-text-secondary hover:wb-text-blue" style="transition: color 0.2s;">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                    <a href="#" class="wb-text-secondary hover:wb-text-blue" style="transition: color 0.2s;">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div>
+                <h4 class="wb-font-semibold wb-mb-md wb-text-primary">Features</h4>
+                <ul class="wb-flex wb-flex-col wb-gap-sm">
+                    <li><a href="{% url 'dictionary:dictionary' %}" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Dictionary</a></li>
+                    <li><a href="{% url 'translator:translate' %}" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Translator</a></li>
+                    <li><a href="{% url 'dictionary:random_word' %}" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Random Word</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'dictionary:favorites_list' %}" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">My Favorites</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <!-- Legal -->
+            <div>
+                <h4 class="wb-font-semibold wb-mb-md wb-text-primary">Company</h4>
+                <ul class="wb-flex wb-flex-col wb-gap-sm">
+                    <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">About Us</a></li>
+                    <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Privacy Policy</a></li>
+                    <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Terms of Service</a></li>
+                    <li><a href="#" class="wb-text-secondary wb-text-sm hover:wb-text-blue" style="transition: color 0.2s;">Contact</a></li>
+                </ul>
+            </div>
+        </div>
         
-        // Active nav link highlighting
-        const currentPath = window.location.pathname;
-        const navLinks = document.querySelectorAll('.nav-link');
-        
-        navLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
-            }
-        });
-    </script>
-    
-    {% block extra_js %}{% endblock %}
+        <div class="wb-border-t wb-mt-xl wb-pt-xl wb-flex wb-flex-col md:wb-flex-row wb-justify-between wb-items-center wb-gap-md">
+            <p class="wb-text-sm wb-text-secondary">
+                © {{ now.year }} WordBud. All rights reserved.
+            </p>
+            <p class="wb-text-sm wb-text-tertiary">
+                Powered by Merriam-Webster API
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Core JS -->
+<script src="{% static 'js/theme.js' %}"></script>
+<script src="{% static 'js/ui.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>

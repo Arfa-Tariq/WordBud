@@ -1,0 +1,238 @@
+/* ============================================
+   ANIMATIONS.CSS - Fade, Slide, Stagger
+   ============================================ */
+/* Keyframe Definitions */
+@keyframes wb-fade-in {
+from {
+opacity: 0;
+}
+to {
+opacity: 1;
+}
+}
+@keyframes wb-fade-out {
+from {
+opacity: 1;
+}
+to {
+opacity: 0;
+}
+}
+@keyframes wb-slide-up {
+from {
+opacity: 0;
+transform: translateY(30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+@keyframes wb-slide-down {
+from {
+opacity: 0;
+transform: translateY(-30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+@keyframes wb-slide-left {
+from {
+opacity: 0;
+transform: translateX(30px);
+}
+to {
+opacity: 1;
+transform: translateX(0);
+}
+}
+@keyframes wb-slide-right {
+from {
+opacity: 0;
+transform: translateX(-30px);
+}
+to {
+opacity: 1;
+transform: translateX(0);
+}
+}
+@keyframes wb-scale-in {
+from {
+opacity: 0;
+transform: scale(0.9);
+}
+to {
+opacity: 1;
+transform: scale(1);
+}
+}
+@keyframes wb-pulse {
+0%, 100% {
+opacity: 1;
+}
+50% {
+opacity: 0.7;
+}
+}
+@keyframes wb-bounce {
+0%, 100% {
+transform: translateY(0);
+}
+50% {
+transform: translateY(-10px);
+}
+}
+@keyframes wb-spin {
+from {
+transform: rotate(0deg);
+}
+to {
+transform: rotate(360deg);
+}
+}
+/* Animation Classes */
+.wb-fade-in {
+animation: wb-fade-in 0.5s ease-out forwards;
+}
+.wb-fade-out {
+animation: wb-fade-out 0.3s ease-out forwards;
+}
+.wb-slide-up {
+animation: wb-slide-up 0.5s ease-out forwards;
+}
+.wb-slide-down {
+animation: wb-slide-down 0.5s ease-out forwards;
+}
+.wb-slide-left {
+animation: wb-slide-left 0.5s ease-out forwards;
+}
+.wb-slide-right {
+animation: wb-slide-right 0.5s ease-out forwards;
+}
+.wb-scale-in {
+animation: wb-scale-in 0.4s ease-out forwards;
+}
+.wb-pulse {
+animation: wb-pulse 2s ease-in-out infinite;
+}
+.wb-bounce {
+animation: wb-bounce 1s ease-in-out infinite;
+}
+.wb-spin {
+animation: wb-spin 1s linear infinite;
+}
+/* Delay Classes */
+.wb-delay-100 {
+animation-delay: 100ms;
+}
+.wb-delay-200 {
+animation-delay: 200ms;
+}
+.wb-delay-300 {
+animation-delay: 300ms;
+}
+.wb-delay-400 {
+animation-delay: 400ms;
+}
+.wb-delay-500 {
+animation-delay: 500ms;
+}
+/* Stagger Effect (use with JS or nth-child) */
+.wb-stagger-item:nth-child(1) { animation-delay: 0ms; }
+.wb-stagger-item:nth-child(2) { animation-delay: 100ms; }
+.wb-stagger-item:nth-child(3) { animation-delay: 200ms; }
+.wb-stagger-item:nth-child(4) { animation-delay: 300ms; }
+.wb-stagger-item:nth-child(5) { animation-delay: 400ms; }
+.wb-stagger-item:nth-child(6) { animation-delay: 500ms; }
+/* Hover Effects */
+.wb-hover-lift {
+transition: transform var(--wb-transition-base), box-shadow var(--wb-transition-base);
+}
+.wb-hover-lift:hover {
+transform: translateY(-4px);
+box-shadow: var(--wb-shadow-lg);
+}
+.wb-hover-scale {
+transition: transform var(--wb-transition-base);
+}
+.wb-hover-scale:hover {
+transform: scale(1.05);
+}
+.wb-hover-scale-sm:hover {
+transform: scale(1.02);
+}
+.wb-hover-rotate {
+transition: transform var(--wb-transition-base);
+}
+.wb-hover-rotate:hover {
+transform: rotate(5deg);
+}
+.wb-hover-brightness {
+transition: filter var(--wb-transition-base);
+}
+.wb-hover-brightness:hover {
+filter: brightness(1.1);
+}
+/* Active State */
+.wb-active-scale:active {
+transform: scale(0.95);
+}
+/* Progress Line Animation */
+.wb-progress-line {
+position: relative;
+overflow: hidden;
+}
+.wb-progress-line::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+width: 0;
+height: 3px;
+background: linear-gradient(90deg, var(--wb-blue), var(--wb-coral));
+transition: width var(--wb-transition-slow);
+}
+.wb-progress-line:hover::after {
+width: 100%;
+}
+/* Loading Spinner */
+.wb-spinner {
+display: inline-block;
+width: 40px;
+height: 40px;
+border: 4px solid var(--wb-border);
+border-top-color: var(--wb-blue);
+border-radius: var(--wb-radius-full);
+animation: wb-spin 0.8s linear infinite;
+}
+.wb-spinner-sm {
+width: 20px;
+height: 20px;
+border-width: 2px;
+}
+.wb-spinner-lg {
+width: 60px;
+height: 60px;
+border-width: 6px;
+}
+/* Entrance Animations (for page load) */
+.wb-animate-on-scroll {
+opacity: 0;
+transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.wb-animate-on-scroll.wb-visible {
+opacity: 1;
+transform: translateY(0);
+}
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+*,
+*::before,
+*::after {
+animation-duration: 0.01ms !important;
+animation-iteration-count: 1 !important;
+transition-duration: 0.01ms !important;
+}
+}

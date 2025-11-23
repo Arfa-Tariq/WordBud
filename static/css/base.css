@@ -1,0 +1,166 @@
+/* ============================================
+   BASE.CSS - Foundation & Variables
+   ============================================ */
+/* CSS Reset */
+*, *::before, *::after {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+ /* CSS Variables */
+:root {
+  /* Brand Colors */
+  --wb-blue: #89BFFE;
+  --wb-coral: #F78E6C;
+  --wb-yellow: #FFFF95;
+  --wb-lime: #A7CD5A;
+  --wb-mauve: #A47F95;
+  --wb-rust: #CA5C4B;
+  --wb-orange: #FCA451;
+  /* Light Mode */
+  --wb-bg-primary: #FFFFFF;
+  --wb-bg-secondary: #F8F9FB;
+  --wb-bg-tertiary: #F1F3F5;
+  --wb-text-primary: #1A1D29;
+  --wb-text-secondary: #6B7280;
+  --wb-text-tertiary: #9CA3AF;
+  --wb-border: #E5E7EB;
+  --wb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --wb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --wb-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+  --wb-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+  /* Spacing */
+  --wb-spacing-xs: 0.25rem;
+  --wb-spacing-sm: 0.5rem;
+  --wb-spacing-md: 1rem;
+  --wb-spacing-lg: 1.5rem;
+  --wb-spacing-xl: 2rem;
+  --wb-spacing-2xl: 3rem;
+  --wb-spacing-3xl: 4rem;
+  /* Border Radius */
+  --wb-radius-sm: 8px;
+  --wb-radius-md: 12px;
+  --wb-radius-lg: 16px;
+  --wb-radius-xl: 20px;
+  --wb-radius-full: 9999px;
+  /* Transitions */
+  --wb-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --wb-transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --wb-transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Typography */
+  --wb-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --wb-font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --wb-text-xs: 0.75rem;
+  --wb-text-sm: 0.875rem;
+  --wb-text-base: 1rem;
+  --wb-text-lg: 1.125rem;
+  --wb-text-xl: 1.25rem;
+  --wb-text-2xl: 1.5rem;
+  --wb-text-3xl: 1.875rem;
+  --wb-text-4xl: 2.25rem;
+  --wb-text-5xl: 3rem;
+  --wb-font-normal: 400;
+  --wb-font-medium: 500;
+  --wb-font-semibold: 600;
+  --wb-font-bold: 700;
+  --wb-leading-tight: 1.25;
+  --wb-leading-normal: 1.5;
+  --wb-leading-relaxed: 1.75;
+}
+ /* Dark Mode Variables */
+html[data-theme="dark"] {
+--wb-bg-primary: #0F1419;
+--wb-bg-secondary: #1A1F2E;
+--wb-bg-tertiary: #252A38;
+--wb-text-primary: #F3F4F6;
+--wb-text-secondary: #9CA3AF;
+--wb-text-tertiary: #6B7280;
+--wb-border: #374151;
+--wb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+--wb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+--wb-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+--wb-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+/* Base Styles */
+html {
+font-size: 16px;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+scroll-behavior: smooth;
+}
+body {
+font-family: var(--wb-font-sans);
+font-size: var(--wb-text-base);
+font-weight: var(--wb-font-normal);
+line-height: var(--wb-leading-normal);
+color: var(--wb-text-primary);
+background-color: var(--wb-bg-primary);
+transition: background-color var(--wb-transition-base), color var(--wb-transition-base);
+min-height: 100vh;
+}
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+font-weight: var(--wb-font-bold);
+line-height: var(--wb-leading-tight);
+color: var(--wb-text-primary);
+margin-bottom: var(--wb-spacing-md);
+}
+h1 { font-size: var(--wb-text-5xl); }
+h2 { font-size: var(--wb-text-4xl); }
+h3 { font-size: var(--wb-text-3xl); }
+h4 { font-size: var(--wb-text-2xl); }
+h5 { font-size: var(--wb-text-xl); }
+h6 { font-size: var(--wb-text-lg); }
+p {
+margin-bottom: var(--wb-spacing-md);
+color: var(--wb-text-secondary);
+}
+a {
+color: var(--wb-blue);
+text-decoration: none;
+transition: color var(--wb-transition-fast);
+}
+a:hover {
+color: var(--wb-coral);
+}
+/* Lists */
+ul, ol {
+list-style: none;
+}
+/* Focus Styles */
+*:focus-visible {
+outline: 2px solid var(--wb-blue);
+outline-offset: 2px;
+}
+/* Selection */
+::selection {
+background-color: var(--wb-blue);
+color: white;
+}
+/* Scrollbar (Webkit) */
+::-webkit-scrollbar {
+width: 10px;
+height: 10px;
+}
+::-webkit-scrollbar-track {
+background: var(--wb-bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+background: var(--wb-border);
+border-radius: var(--wb-radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+background: var(--wb-text-tertiary);
+}
+/* Utilities */
+.sr-only {
+position: absolute;
+width: 1px;
+height: 1px;
+padding: 0;
+margin: -1px;
+overflow: hidden;
+clip: rect(0, 0, 0, 0);
+white-space: nowrap;
+border-width: 0;
+}
