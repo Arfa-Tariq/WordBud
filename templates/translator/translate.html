@@ -1,146 +1,284 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Translator – WordBud{% endblock %}
+{% block title %}Translator — WordBud{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'translator/translator.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="translator-container">
-    <div class="page-header">
-        <h1>🌐 Language Translator</h1>
-        <p>Translate text between {{ total_languages }} languages instantly</p>
+<div class="wb-container wb-py-3xl">
+    <!-- Page Header -->
+    <div class="wb-text-center wb-mb-3xl wb-animate-on-scroll wb-slide-up">
+        <h1 class="wb-mb-md" style="background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Language Translator</h1>
+        <p class="wb-text-secondary wb-text-xl">Translate text between {{ total_languages }} languages instantly</p>
     </div>
     
-    <div class="translator-card">
+    <!-- Main Translator Card -->
+    <div class="wb-card wb-animate-on-scroll wb-slide-up wb-delay-100 translator-main" style="max-width: 1200px; margin: 0 auto;">
         <div class="translator-grid">
             <!-- Source Panel -->
-            <div class="translation-panel source-panel">
-                <div class="panel-header">
-                    <div class="lang-selector">
-                        <label for="sourceLang">From:</label>
-                        <select id="sourceLang" class="lang-select">
+            <div class="wb-card wb-bg-secondary" style="border: 2px solid var(--wb-border);">
+                <div class="wb-flex-between wb-mb-md">
+                    <div style="flex: 1;">
+                        <label for="sourceLang" class="wb-label">From:</label>
+                        <select id="sourceLang" class="wb-select">
                             <option value="auto" selected>Auto-detect</option>
                             {% for code, name in languages %}
                             <option value="{{ code }}">{{ name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <button id="detectBtn" class="icon-btn" title="Detect language">
-                        🔍 Detect
+                    <button id="detectBtn" class="wb-btn wb-btn-secondary wb-btn-sm" title="Detect language" style="align-self: flex-end; margin-left: var(--wb-spacing-md);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        Detect
                     </button>
                 </div>
                 
                 <textarea 
                     id="sourceText" 
-                    class="translation-input" 
+                    class="wb-textarea" 
                     placeholder="Enter text to translate..."
                     maxlength="5000"
+                    style="min-height: 200px; background-color: var(--wb-bg-primary);"
                 ></textarea>
                 
-                <div class="panel-footer">
-                    <span id="charCount" class="char-count">0 / 5000</span>
-                    <button id="clearBtn" class="icon-btn" title="Clear text">
-                        🗑️ Clear
+                <div class="wb-flex-between wb-mt-md wb-pt-md" style="border-top: 1px solid var(--wb-border);">
+                    <span id="charCount" class="wb-text-sm wb-text-tertiary" style="font-family: var(--wb-font-mono);">0 / 5000</span>
+                    <button id="clearBtn" class="wb-btn wb-btn-ghost wb-btn-sm" title="Clear text">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                        Clear
                     </button>
                 </div>
             </div>
             
             <!-- Swap Button -->
-            <div class="swap-container">
-                <button id="swapBtn" class="swap-btn" title="Swap languages">
-                    ⇄
+            <div class="wb-flex-center" style="padding-top: 60px;">
+                <button id="swapBtn" title="Swap languages" style="width: 56px; height: 56px; border-radius: var(--wb-radius-full); background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral)); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--wb-shadow-md); transition: all var(--wb-transition-base);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 16V4M7 4L3 8M7 4l4 4"/>
+                        <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                    </svg>
                 </button>
             </div>
             
             <!-- Target Panel -->
-            <div class="translation-panel target-panel">
-                <div class="panel-header">
-                    <div class="lang-selector">
-                        <label for="targetLang">To:</label>
-                        <select id="targetLang" class="lang-select">
+            <div class="wb-card wb-bg-secondary" style="border: 2px solid var(--wb-border);">
+                <div class="wb-flex-between wb-mb-md">
+                    <div style="flex: 1;">
+                        <label for="targetLang" class="wb-label">To:</label>
+                        <select id="targetLang" class="wb-select">
                             {% for code, name in languages %}
                             <option value="{{ code }}" {% if code == 'es' %}selected{% endif %}>{{ name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <button id="copyBtn" class="icon-btn" title="Copy translation" disabled>
-                        📋 Copy
+                    <button id="copyBtn" class="wb-btn wb-btn-secondary wb-btn-sm" title="Copy translation" disabled style="align-self: flex-end; margin-left: var(--wb-spacing-md);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copy
                     </button>
                 </div>
                 
-                <div id="targetText" class="translation-output">
-                    <span class="placeholder-text">Translation will appear here...</span>
+                <div id="targetText" style="min-height: 200px; max-height: 400px; padding: var(--wb-spacing-md); background-color: var(--wb-bg-primary); border: 2px solid transparent; border-radius: var(--wb-radius-md); font-size: var(--wb-text-lg); line-height: var(--wb-leading-relaxed); color: var(--wb-text-primary); overflow-y: auto;">
+                    <span class="wb-text-tertiary" style="font-style: italic;">Translation will appear here...</span>
                 </div>
                 
-                <div class="panel-footer">
-                    <span id="translationInfo" class="translation-info"></span>
+                <div class="wb-mt-md wb-pt-md" style="border-top: 1px solid var(--wb-border);">
+                    <span id="translationInfo" class="wb-text-sm wb-text-blue wb-font-medium"></span>
                 </div>
             </div>
         </div>
         
         <!-- Translate Button -->
-        <div class="action-container">
-            <button id="translateBtn" class="translate-btn" disabled>
-                <span class="btn-icon">🌍</span>
-                <span class="btn-text">Translate</span>
+        <div class="wb-text-center wb-mt-2xl">
+            <button id="translateBtn" class="wb-btn wb-btn-primary wb-btn-lg" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m5 8 6 6"/>
+                    <path d="m4 14 6-6 2-3"/>
+                    <path d="M2 5h12"/>
+                    <path d="M7 2h1"/>
+                    <path d="m22 22-5-10-5 10"/>
+                    <path d="M14 18h6"/>
+                </svg>
+                <span>Translate</span>
             </button>
         </div>
         
         <!-- Loading Spinner -->
-        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
-            <div class="spinner"></div>
-            <span>Translating...</span>
+        <div id="loadingSpinner" class="wb-flex-center" style="display: none; flex-direction: column; padding: var(--wb-spacing-2xl); gap: var(--wb-spacing-md);">
+            <div class="wb-spinner"></div>
+            <span class="wb-text-secondary">Translating...</span>
         </div>
         
         <!-- Error Message -->
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="errorMessage" class="wb-alert wb-alert-error wb-mt-lg" style="display: none;"></div>
         
         <!-- Success Message -->
-        <div id="successMessage" class="success-message" style="display: none;"></div>
+        <div id="successMessage" class="wb-alert wb-alert-success wb-mt-lg" style="display: none;"></div>
     </div>
     
     <!-- Recent Translations -->
-    <div class="recent-translations" id="recentTranslations" style="display: none;">
-        <h3>📚 Recent Translations</h3>
-        <div id="recentList" class="recent-list"></div>
-        <button id="clearHistoryBtn" class="clear-history-btn">Clear History</button>
+    <div class="wb-mt-3xl wb-animate-on-scroll wb-slide-up wb-delay-200" id="recentTranslations" style="display: none; max-width: 1200px; margin-left: auto; margin-right: auto;">
+        <div class="wb-flex-between wb-mb-lg">
+            <h3 class="wb-text-2xl wb-font-bold">Recent Translations</h3>
+            <button id="clearHistoryBtn" class="wb-btn wb-btn-outline wb-btn-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+                Clear History
+            </button>
+        </div>
+        <div id="recentList" class="wb-grid wb-gap-md"></div>
     </div>
     
     <!-- Features Info -->
-    <div class="features-info">
-        <div class="feature-item">
-            <span class="feature-icon">🔍</span>
-            <div>
-                <h4>Auto-Detection</h4>
-                <p>Automatically detect source language</p>
+    <div class="wb-grid wb-grid-cols-1 md:wb-grid-cols-2 lg:wb-grid-cols-4 wb-gap-lg wb-mt-3xl">
+        <div class="wb-card wb-text-center wb-hover-lift wb-animate-on-scroll wb-slide-up wb-stagger-item feature-card">
+            <div class="wb-flex-center wb-mb-md feature-icon" style="width: 64px; height: 64px; margin-left: auto; margin-right: auto; background: linear-gradient(135deg, rgba(137, 191, 254, 0.15), rgba(247, 142, 108, 0.15)); border-radius: var(--wb-radius-lg); color: var(--wb-blue); transition: all var(--wb-transition-base);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
             </div>
+            <h4 class="wb-text-lg wb-font-semibold wb-mb-sm">Auto-Detection</h4>
+            <p class="wb-text-secondary wb-text-sm wb-m-0">Automatically detect source language</p>
         </div>
-        <div class="feature-item">
-            <span class="feature-icon">⚡</span>
-            <div>
-                <h4>Instant Translation</h4>
-                <p>Fast and accurate results</p>
+        
+        <div class="wb-card wb-text-center wb-hover-lift wb-animate-on-scroll wb-slide-up wb-stagger-item feature-card">
+            <div class="wb-flex-center wb-mb-md feature-icon" style="width: 64px; height: 64px; margin-left: auto; margin-right: auto; background: linear-gradient(135deg, rgba(137, 191, 254, 0.15), rgba(247, 142, 108, 0.15)); border-radius: var(--wb-radius-lg); color: var(--wb-blue); transition: all var(--wb-transition-base);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
             </div>
+            <h4 class="wb-text-lg wb-font-semibold wb-mb-sm">Instant Translation</h4>
+            <p class="wb-text-secondary wb-text-sm wb-m-0">Fast and accurate results</p>
         </div>
-        <div class="feature-item">
-            <span class="feature-icon">📋</span>
-            <div>
-                <h4>Easy Copy</h4>
-                <p>One-click copy to clipboard</p>
+        
+        <div class="wb-card wb-text-center wb-hover-lift wb-animate-on-scroll wb-slide-up wb-stagger-item feature-card">
+            <div class="wb-flex-center wb-mb-md feature-icon" style="width: 64px; height: 64px; margin-left: auto; margin-right: auto; background: linear-gradient(135deg, rgba(137, 191, 254, 0.15), rgba(247, 142, 108, 0.15)); border-radius: var(--wb-radius-lg); color: var(--wb-blue); transition: all var(--wb-transition-base);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
             </div>
+            <h4 class="wb-text-lg wb-font-semibold wb-mb-sm">Easy Copy</h4>
+            <p class="wb-text-secondary wb-text-sm wb-m-0">One-click copy to clipboard</p>
         </div>
-        <div class="feature-item">
-            <span class="feature-icon">🌍</span>
-            <div>
-                <h4>{{ total_languages }}+ Languages</h4>
-                <p>Comprehensive language support</p>
+        
+        <div class="wb-card wb-text-center wb-hover-lift wb-animate-on-scroll wb-slide-up wb-stagger-item feature-card">
+            <div class="wb-flex-center wb-mb-md feature-icon" style="width: 64px; height: 64px; margin-left: auto; margin-right: auto; background: linear-gradient(135deg, rgba(137, 191, 254, 0.15), rgba(247, 142, 108, 0.15)); border-radius: var(--wb-radius-lg); color: var(--wb-blue); transition: all var(--wb-transition-base);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    <path d="M2 12h20"></path>
+                </svg>
             </div>
+            <h4 class="wb-text-lg wb-font-semibold wb-mb-sm">{{ total_languages }}+ Languages</h4>
+            <p class="wb-text-secondary wb-text-sm wb-m-0">Comprehensive language support</p>
         </div>
     </div>
 </div>
+
+<style>
+/* Translator-specific grid */
+.translator-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--wb-spacing-xl);
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .translator-grid {
+        grid-template-columns: 1fr;
+        gap: var(--wb-spacing-lg);
+    }
+}
+
+/* Swap button - simple hover */
+#swapBtn:hover {
+    box-shadow: var(--wb-shadow-lg);
+}
+
+#swapBtn:active {
+    transform: scale(0.95);
+}
+
+/* Remove hover animation from translator card */
+.wb-card.translator-main {
+    transition: none !important;
+}
+
+.wb-card.translator-main:hover {
+    transform: none !important;
+    box-shadow: var(--wb-shadow-md) !important;
+}
+
+/* Recent item styles */
+.recent-item {
+    background-color: var(--wb-bg-secondary);
+    border: 1px solid var(--wb-border);
+    border-radius: var(--wb-radius-lg);
+    padding: var(--wb-spacing-lg);
+    cursor: pointer;
+    transition: all var(--wb-transition-base);
+}
+
+.recent-item:hover {
+    border-color: var(--wb-blue);
+    box-shadow: var(--wb-shadow-md);
+    transform: translateY(-2px);
+}
+
+.recent-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--wb-spacing-sm);
+    font-size: var(--wb-text-sm);
+    font-weight: var(--wb-font-semibold);
+    color: var(--wb-blue);
+}
+
+.recent-item-text,
+.recent-item-translation {
+    margin-bottom: var(--wb-spacing-sm);
+    padding: var(--wb-spacing-sm) var(--wb-spacing-md);
+    background-color: var(--wb-bg-primary);
+    border-radius: var(--wb-radius-sm);
+    font-size: var(--wb-text-sm);
+    line-height: var(--wb-leading-normal);
+}
+
+.recent-item-text {
+    color: var(--wb-text-secondary);
+    border-left: 3px solid var(--wb-blue);
+}
+
+.recent-item-translation {
+    color: var(--wb-text-primary);
+    border-left: 3px solid var(--wb-coral);
+    margin-bottom: 0;
+}
+
+/* Feature cards - keep hover effect only for bottom cards */
+.feature-card:hover .feature-icon {
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral)) !important;
+    color: white !important;
+    transform: scale(1.1) rotate(5deg);
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}

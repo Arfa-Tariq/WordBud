@@ -1,3 +1,4 @@
+<!-- profile_edit.html -->
 {% extends "base.html" %}
 {% load static %}
 
@@ -8,100 +9,117 @@
     .edit-container {
         max-width: 800px;
         margin: 0 auto;
-        padding: 20px;
+        padding: var(--wb-spacing-xl);
     }
     
     .page-header {
-        margin-bottom: 30px;
+        margin-bottom: var(--wb-spacing-2xl);
+        text-align: center;
     }
     
     .page-title {
-        font-size: 32px;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 10px;
+        font-size: var(--wb-text-4xl);
+        font-weight: var(--wb-font-bold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--wb-spacing-md);
     }
     
     .page-subtitle {
-        color: #7f8c8d;
+        color: var(--wb-text-secondary);
+        font-size: var(--wb-text-lg);
     }
     
     .edit-card {
-        background: white;
-        border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        background: var(--wb-bg-primary);
+        border-radius: var(--wb-radius-xl);
+        padding: var(--wb-spacing-3xl);
+        box-shadow: var(--wb-shadow-lg);
+        border: 1px solid var(--wb-border);
     }
     
     .form-section {
-        margin-bottom: 35px;
+        margin-bottom: var(--wb-spacing-3xl);
+        padding-bottom: var(--wb-spacing-2xl);
+        border-bottom: 2px solid var(--wb-border);
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
     }
     
     .section-title {
-        font-size: 20px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #ecf0f1;
+        font-size: var(--wb-text-2xl);
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-lg);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: var(--wb-spacing-sm);
     }
     
     .form-group {
-        margin-bottom: 25px;
+        margin-bottom: var(--wb-spacing-xl);
     }
     
     .form-group label {
         display: block;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 8px;
-        font-size: 15px;
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-sm);
+        font-size: var(--wb-text-base);
     }
     
     .form-group input[type="text"],
     .form-group input[type="email"],
     .form-group textarea {
         width: 100%;
-        padding: 12px 16px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 15px;
-        transition: all 0.3s;
-        font-family: inherit;
+        padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+        border: 2px solid var(--wb-border);
+        border-radius: var(--wb-radius-md);
+        font-size: var(--wb-text-base);
+        transition: all var(--wb-transition-base);
+        font-family: var(--wb-font-sans);
+        background: var(--wb-bg-secondary);
+        color: var(--wb-text-primary);
     }
     
     .form-group input:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #4a90e2;
-        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        border-color: var(--wb-blue);
+        box-shadow: 0 0 0 3px rgba(137, 191, 254, 0.2);
     }
     
     .form-group textarea {
         resize: vertical;
-        min-height: 100px;
+        min-height: 120px;
     }
     
     .help-text {
-        font-size: 13px;
-        color: #95a5a6;
-        margin-top: 5px;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-tertiary);
+        margin-top: var(--wb-spacing-xs);
     }
     
     .error-text {
-        font-size: 13px;
-        color: #e74c3c;
-        margin-top: 5px;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-rust);
+        margin-top: var(--wb-spacing-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--wb-spacing-xs);
     }
     
     /* Profile Image Upload */
     .image-upload-section {
         display: flex;
         align-items: center;
-        gap: 30px;
+        gap: var(--wb-spacing-2xl);
         flex-wrap: wrap;
     }
     
@@ -112,45 +130,46 @@
     .current-image {
         width: 120px;
         height: 120px;
-        border-radius: 50%;
+        border-radius: var(--wb-radius-full);
         object-fit: cover;
-        border: 3px solid #e0e0e0;
+        border: 3px solid var(--wb-border);
     }
     
     .default-avatar-preview {
         width: 120px;
         height: 120px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--wb-radius-full);
+        background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 48px;
+        font-size: var(--wb-text-3xl);
         color: white;
-        border: 3px solid #e0e0e0;
+        border: 3px solid var(--wb-border);
+        font-weight: var(--wb-font-bold);
     }
     
     .delete-image-btn {
         position: absolute;
         top: -5px;
         right: -5px;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #e74c3c;
+        width: 32px;
+        height: 32px;
+        border-radius: var(--wb-radius-full);
+        background: var(--wb-rust);
         color: white;
-        border: 2px solid white;
+        border: 2px solid var(--wb-bg-primary);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
-        transition: all 0.3s;
+        font-size: var(--wb-text-lg);
+        transition: all var(--wb-transition-base);
     }
     
     .delete-image-btn:hover {
         background: #c0392b;
-        transform: rotate(90deg);
+        transform: scale(1.1);
     }
     
     .image-upload-controls {
@@ -170,135 +189,88 @@
     }
     
     .file-input-label {
-        display: inline-block;
-        padding: 12px 24px;
-        background: #4a90e2;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--wb-spacing-sm);
+        padding: var(--wb-spacing-md) var(--wb-spacing-xl);
+        background: var(--wb-blue);
         color: white;
-        border-radius: 8px;
+        border-radius: var(--wb-radius-md);
         cursor: pointer;
-        transition: all 0.3s;
-        font-weight: 600;
+        transition: all var(--wb-transition-base);
+        font-weight: var(--wb-font-semibold);
     }
     
     .file-input-label:hover {
-        background: #357abd;
+        background: #7aa8e0;
         transform: translateY(-2px);
+        box-shadow: var(--wb-shadow-md);
     }
     
     .file-name {
-        margin-top: 10px;
-        font-size: 14px;
-        color: #7f8c8d;
+        margin-top: var(--wb-spacing-sm);
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-secondary);
     }
     
     .char-counter {
         text-align: right;
-        font-size: 13px;
-        color: #95a5a6;
-        margin-top: 5px;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-tertiary);
+        margin-top: var(--wb-spacing-xs);
     }
     
     .char-counter.warning {
-        color: #f39c12;
+        color: var(--wb-orange);
     }
     
     .char-counter.danger {
-        color: #e74c3c;
+        color: var(--wb-rust);
     }
     
     /* Form Actions */
     .form-actions {
         display: flex;
-        gap: 15px;
-        padding-top: 30px;
-        border-top: 2px solid #ecf0f1;
+        gap: var(--wb-spacing-md);
+        padding-top: var(--wb-spacing-2xl);
+        border-top: 2px solid var(--wb-border);
         flex-wrap: wrap;
-    }
-    
-    .btn {
-        padding: 14px 32px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 16px;
-        transition: all 0.3s;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    }
-    
-    .btn-secondary {
-        background: white;
-        color: #7f8c8d;
-        border: 2px solid #e0e0e0;
-    }
-    
-    .btn-secondary:hover {
-        background: #f8f9fa;
-        border-color: #bdc3c7;
     }
     
     /* Messages */
     .alert {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 25px;
+        padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+        border-radius: var(--wb-radius-md);
+        margin-bottom: var(--wb-spacing-lg);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: var(--wb-spacing-sm);
+        border-left: 4px solid;
     }
     
     .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background-color: rgba(167, 205, 90, 0.1);
+        border-color: var(--wb-lime);
+        color: var(--wb-lime);
     }
     
     .alert-error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
-    /* Dark Theme */
-    body.dark-theme .edit-card {
-        background: #2c3e50;
-    }
-    
-    body.dark-theme .page-title,
-    body.dark-theme .section-title,
-    body.dark-theme .form-group label {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .form-group input,
-    body.dark-theme .form-group textarea {
-        background: #34495e;
-        border-color: #4a5568;
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .current-image,
-    body.dark-theme .default-avatar-preview {
-        border-color: #4a5568;
+        background-color: rgba(202, 92, 75, 0.1);
+        border-color: var(--wb-rust);
+        color: var(--wb-rust);
     }
     
     @media (max-width: 768px) {
+        .edit-container {
+            padding: var(--wb-spacing-md);
+        }
+        
         .edit-card {
-            padding: 25px;
+            padding: var(--wb-spacing-xl);
+        }
+        
+        .page-title {
+            font-size: var(--wb-text-3xl);
         }
         
         .image-upload-section {
@@ -309,11 +281,6 @@
         .form-actions {
             flex-direction: column;
         }
-        
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
     }
 </style>
 {% endblock %}
@@ -321,11 +288,13 @@
 {% block content %}
 <div class="edit-container">
     <div class="page-header">
-        <h1 class="page-title">✏️ Edit Profile</h1>
+        <h1 class="page-title">
+            <span>✏️</span>
+            Edit Profile
+        </h1>
         <p class="page-subtitle">Update your personal information and profile picture</p>
     </div>
     
-    <!-- Messages
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">
@@ -334,8 +303,8 @@
             </div>
         {% endfor %}
     {% endif %}
-     -->
-    <div class="edit-card">
+    
+    <div class="edit-card wb-slide-up">
         <form method="post" enctype="multipart/form-data" id="profileForm">
             {% csrf_token %}
             
@@ -368,7 +337,10 @@
                         <div class="file-name" id="fileName"></div>
                         <p class="help-text">JPG, PNG, or GIF. Maximum 5MB.</p>
                         {% if form.profile_image.errors %}
-                            <p class="error-text">{{ form.profile_image.errors.0 }}</p>
+                            <p class="error-text">
+                                <span>⚠️</span>
+                                {{ form.profile_image.errors.0 }}
+                            </p>
                         {% endif %}
                     </div>
                 </div>
@@ -388,7 +360,10 @@
                         <p class="help-text">{{ form.first_name.help_text }}</p>
                     {% endif %}
                     {% if form.first_name.errors %}
-                        <p class="error-text">{{ form.first_name.errors.0 }}</p>
+                        <p class="error-text">
+                            <span>⚠️</span>
+                            {{ form.first_name.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
                 
@@ -399,7 +374,10 @@
                         <p class="help-text">{{ form.last_name.help_text }}</p>
                     {% endif %}
                     {% if form.last_name.errors %}
-                        <p class="error-text">{{ form.last_name.errors.0 }}</p>
+                        <p class="error-text">
+                            <span>⚠️</span>
+                            {{ form.last_name.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
                 
@@ -410,7 +388,10 @@
                         <p class="help-text">{{ form.username.help_text }}</p>
                     {% endif %}
                     {% if form.username.errors %}
-                        <p class="error-text">{{ form.username.errors.0 }}</p>
+                        <p class="error-text">
+                            <span>⚠️</span>
+                            {{ form.username.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
             </div>
@@ -432,18 +413,22 @@
                         <p class="help-text">{{ form.bio.help_text }}</p>
                     {% endif %}
                     {% if form.bio.errors %}
-                        <p class="error-text">{{ form.bio.errors.0 }}</p>
+                        <p class="error-text">
+                            <span>⚠️</span>
+                            {{ form.bio.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
             </div>
             
             <!-- Form Actions -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    💾 Save Changes
+                <button type="submit" class="wb-btn wb-btn-primary">
+                    <span>💾</span>
+                    Save Changes
                 </button>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
-                    ❌ Cancel
+                <a href="{% url 'accounts:profile' %}" class="wb-btn wb-btn-secondary">
+                    Cancel
                 </a>
             </div>
         </form>
@@ -535,14 +520,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Remove delete button
                     deleteBtn.remove();
                     
-                    alert('Profile picture removed successfully!');
+                    // Show success message
+                    WB.showToast('Profile picture removed successfully!', 'success');
                 } else {
-                    alert('Error: ' + data.error);
+                    WB.showToast('Error: ' + data.error, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to delete profile picture');
+                WB.showToast('Failed to delete profile picture', 'error');
             });
         });
     }

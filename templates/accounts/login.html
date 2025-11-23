@@ -1,12 +1,366 @@
-{% extends "base.html" %}
-{% block title %}Login - WordBud{% endblock %}
 
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Login - WordBud{% endblock %}
+{% block extra_css %}
+<style>
+  .auth-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .auth-visual {
+    background: linear-gradient(135deg, var(--wb-blue) 0%, var(--wb-mauve) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wb-spacing-3xl);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .auth-visual::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+      radial-gradient(circle at 30% 40%, rgba(255, 255, 149, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(167, 205, 90, 0.2) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, -30px) rotate(120deg); }
+    66% { transform: translate(-20px, 20px) rotate(240deg); }
+  }
+  
+  .auth-logo {
+    position: relative;
+    z-index: 1;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: var(--wb-spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--wb-spacing-sm);
+  }
+  
+  .auth-tagline {
+    position: relative;
+    z-index: 1;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+    max-width: 400px;
+    line-height: 1.4;
+    margin-bottom: var(--wb-spacing-2xl);
+  }
+  
+  .auth-illustration {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    margin-top: var(--wb-spacing-xl);
+  }
+  
+  .welcome-graphic {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+  }
+  
+  .circle-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    backdrop-filter: blur(20px);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.05); }
+  }
+  
+  .key-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, var(--wb-yellow), var(--wb-orange));
+    border-radius: 50% 50% 50% 0;
+    transform-origin: center;
+    animation: rotate-key 4s ease-in-out infinite;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
+  
+  @keyframes rotate-key {
+    0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+    50% { transform: translate(-50%, -50%) rotate(15deg); }
+  }
+  
+  .dots {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+  
+  .dot:nth-child(1) { top: 10%; left: 10%; animation: float-dot 3s ease-in-out infinite; }
+  .dot:nth-child(2) { top: 20%; right: 15%; animation: float-dot 3.5s ease-in-out infinite 0.5s; }
+  .dot:nth-child(3) { bottom: 15%; left: 20%; animation: float-dot 4s ease-in-out infinite 1s; }
+  .dot:nth-child(4) { bottom: 20%; right: 10%; animation: float-dot 3.2s ease-in-out infinite 1.5s; }
+  
+  @keyframes float-dot {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  
+  .auth-form-container {
+    background: linear-gradient(135deg, var(--wb-coral) 0%, var(--wb-rust) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wb-spacing-3xl);
+  }
+  
+  .auth-form {
+    width: 100%;
+    max-width: 480px;
+    background: var(--wb-bg-primary);
+    padding: var(--wb-spacing-3xl);
+    border-radius: var(--wb-radius-xl);
+    box-shadow: var(--wb-shadow-xl);
+  }
+  
+  .auth-form-title {
+    font-size: var(--wb-text-4xl);
+    font-weight: bold;
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-sm);
+    text-align: center;
+  }
+  
+  .auth-form-subtitle {
+    text-align: center;
+    color: var(--wb-text-secondary);
+    margin-bottom: var(--wb-spacing-2xl);
+  }
+  
+  .auth-form .wb-form-group {
+    margin-bottom: var(--wb-spacing-lg);
+  }
+  
+  .auth-form .wb-label {
+    font-size: var(--wb-text-sm);
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-xs);
+  }
+  
+  .auth-form .wb-input {
+    padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+    border: 2px solid var(--wb-border);
+    border-radius: var(--wb-radius-md);
+    font-size: var(--wb-text-base);
+  }
+  
+  .auth-form .wb-btn-primary {
+    width: 100%;
+    padding: var(--wb-spacing-lg);
+    font-size: var(--wb-text-lg);
+    font-weight: bold;
+    margin-top: var(--wb-spacing-md);
+    background: linear-gradient(135deg, var(--wb-coral), var(--wb-rust));
+    color: white;
+  }
+  
+  .auth-form .wb-btn-primary:hover {
+    background: linear-gradient(135deg, var(--wb-rust), var(--wb-coral));
+  }
+  
+  .forgot-password {
+    text-align: right;
+    margin-top: var(--wb-spacing-sm);
+  }
+  
+  .forgot-password a {
+    font-size: var(--wb-text-sm);
+    color: var(--wb-coral);
+    font-weight: 500;
+  }
+  
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--wb-spacing-md);
+    margin: var(--wb-spacing-xl) 0;
+    color: var(--wb-text-tertiary);
+    font-size: var(--wb-text-sm);
+  }
+  
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--wb-border);
+  }
+  
+  .auth-social-btn {
+    width: 100%;
+    padding: var(--wb-spacing-md);
+    background: white;
+    border: 2px solid var(--wb-border);
+    border-radius: var(--wb-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wb-spacing-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--wb-transition-base);
+  }
+  
+  .auth-social-btn:hover {
+    border-color: var(--wb-blue);
+    box-shadow: var(--wb-shadow-md);
+  }
+  
+  .auth-footer {
+    text-align: center;
+    margin-top: var(--wb-spacing-xl);
+    color: var(--wb-text-secondary);
+  }
+  
+  .auth-footer a {
+    color: var(--wb-coral);
+    font-weight: 600;
+  }
+  
+  @media (max-width: 968px) {
+    .auth-page {
+      grid-template-columns: 1fr;
+    }
+    
+    .auth-visual {
+      display: none;
+    }
+    
+    .auth-form-container {
+      min-height: 100vh;
+    }
+  }
+</style>
+{% endblock %}
 {% block content %}
-<h2>Login</h2>
-<form method="post">
+<div class="auth-page">
+  <!-- Left Side - Form -->
+  <div class="auth-form-container">
+    <form method="post" class="auth-form wb-slide-up">
+      <h1 class="auth-form-title">Welcome Back</h1>
+      <p class="auth-form-subtitle">Login to continue your learning journey</p>
   {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
+  
+  {% if form.non_field_errors %}
+    <div class="wb-alert wb-alert-error wb-mb-md">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+  
+  <div class="wb-form-group">
+    <label for="{{ form.username.id_for_label }}" class="wb-label">Email</label>
+    {{ form.username }}
+    {% if form.username.errors %}
+      <span class="wb-error-message">{{ form.username.errors.0 }}</span>
+    {% endif %}
+  </div>
+  
+  <div class="wb-form-group">
+    <label for="{{ form.password.id_for_label }}" class="wb-label">Password</label>
+    {{ form.password }}
+    {% if form.password.errors %}
+      <span class="wb-error-message">{{ form.password.errors.0 }}</span>
+    {% endif %}
+    <div class="forgot-password">
+      <a href="#">Forgot password?</a>
+    </div>
+  </div>
+  
+  <button type="submit" class="wb-btn wb-btn-primary">
+    Login
+  </button>
+  
+  <div class="auth-footer">
+    Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a>
+  </div>
+  
+  <div class="auth-divider">-OR-</div>
+  
+  <button type="button" class="auth-social-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+<path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+<path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+</svg>
+Sign in with Google
+</button>
 </form>
-<p>Don’t have an account? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
+  </div>  <!-- Right Side - Visual -->
+  <div class="auth-visual">
+    <div class="auth-logo">
+      <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+        <path d="M16 4L4 10L16 16L28 10L16 4Z" fill="white"/>
+        <path d="M4 16L16 22L28 16" stroke="white" stroke-width="2"/>
+        <path d="M4 22L16 28L28 22" stroke="white" stroke-width="2"/>
+      </svg>
+      WORDBUD
+    </div><h2 class="auth-tagline">
+  Unlock your learning potential
+</h2><div class="auth-illustration">
+  <div class="welcome-graphic">
+    <div class="circle-bg"></div>
+    <div class="key-icon"></div>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+{% endblock %}{% block extra_js %}
+<script>
+  document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]').forEach(input => {
+    input.classList.add('wb-input');
+  });
+</script>
 {% endblock %}

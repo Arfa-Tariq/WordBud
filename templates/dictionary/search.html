@@ -1,10 +1,302 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Search - WordBud Dictionary{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Hero Search Section */
+  .search-hero {
+    background: linear-gradient(135deg, var(--wb-bg-secondary) 0%, var(--wb-bg-tertiary) 100%);
+    padding: var(--wb-spacing-3xl) 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .search-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(137, 191, 254, 0.08) 0%, transparent 70%);
+    animation: wb-float 20s ease-in-out infinite;
+  }
+
+  @keyframes wb-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-20px, 20px) scale(1.05); }
+  }
+
+  .search-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .search-title {
+    font-size: var(--wb-text-4xl);
+    font-weight: var(--wb-font-bold);
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-md);
+  }
+
+  .search-subtitle {
+    font-size: var(--wb-text-lg);
+    color: var(--wb-text-secondary);
+    margin-bottom: var(--wb-spacing-2xl);
+  }
+
+  .search-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wb-spacing-md);
+  }
+
+  .search-input-group {
+    display: flex;
+    gap: var(--wb-spacing-sm);
+    flex-wrap: wrap;
+  }
+
+  .search-input-group input {
+    flex: 1;
+    min-width: 200px;
+    padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+    font-size: var(--wb-text-base);
+    border: 2px solid var(--wb-border);
+    border-radius: var(--wb-radius-lg);
+    background: var(--wb-bg-primary);
+    color: var(--wb-text-primary);
+    transition: all var(--wb-transition-base);
+  }
+
+  .search-input-group input:focus {
+    outline: none;
+    border-color: var(--wb-blue);
+    box-shadow: 0 0 0 4px rgba(137, 191, 254, 0.1);
+  }
+
+  .search-input-group input::placeholder {
+    color: var(--wb-text-tertiary);
+  }
+
+  .search-buttons {
+    display: flex;
+    gap: var(--wb-spacing-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .search-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--wb-spacing-xs);
+    padding: var(--wb-spacing-sm) var(--wb-spacing-md);
+    background: var(--wb-bg-primary);
+    border: 1px solid var(--wb-border);
+    border-radius: var(--wb-radius-md);
+    color: var(--wb-text-secondary);
+    font-size: var(--wb-text-sm);
+    text-decoration: none;
+    transition: all var(--wb-transition-fast);
+  }
+
+  .search-link:hover {
+    background: var(--wb-bg-tertiary);
+    border-color: var(--wb-blue);
+    color: var(--wb-text-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Error Handling */
+  .search-error {
+    background: rgba(202, 92, 75, 0.1);
+    border: 1px solid var(--wb-rust);
+    border-radius: var(--wb-radius-lg);
+    padding: var(--wb-spacing-lg);
+    color: var(--wb-rust);
+    text-align: center;
+    margin-top: var(--wb-spacing-xl);
+    animation: wb-slide-up 0.3s ease-out;
+  }
+
+  .search-error strong {
+    display: block;
+    font-weight: var(--wb-font-semibold);
+    margin-bottom: var(--wb-spacing-sm);
+  }
+
+  /* Quick Links */
+  .quick-search-links {
+    display: flex;
+    gap: var(--wb-spacing-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--wb-spacing-lg);
+  }
+
+  .quick-link-tag {
+    padding: var(--wb-spacing-xs) var(--wb-spacing-md);
+    background: rgba(137, 191, 254, 0.1);
+    color: var(--wb-blue);
+    border-radius: var(--wb-radius-full);
+    font-size: var(--wb-text-sm);
+    text-decoration: none;
+    transition: all var(--wb-transition-fast);
+    display: inline-block;
+  }
+
+  .quick-link-tag:hover {
+    background: var(--wb-blue);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .search-hero {
+      padding: var(--wb-spacing-2xl) 0;
+    }
+
+    .search-title {
+      font-size: var(--wb-text-3xl);
+    }
+
+    .search-input-group {
+      flex-direction: column;
+    }
+
+    .search-input-group input {
+      width: 100%;
+    }
+
+    .search-buttons {
+      flex-direction: column;
+    }
+
+    .wb-btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Search Word</h2>
-<form action="{% url 'dictionary:search' %}" method="get">
-  <input type="text" name="q" placeholder="Enter a word..." required>
-  <button type="submit">Search</button>
-  <a href="{% url 'dictionary:random_word' %}">Random Word</a>
-</form>
-{% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+<!-- Search Hero Section -->
+<section class="search-hero wb-fade-in">
+  <div class="wb-container">
+    <div class="search-content">
+      <h1 class="search-title">Discover Words</h1>
+      <p class="search-subtitle">Search our comprehensive dictionary and unlock the power of language</p>
+
+      <form method="get" action="{% url 'dictionary:search' %}" class="search-form-wrapper">
+        <div class="search-input-group">
+          <input 
+            type="text" 
+            name="q" 
+            placeholder="Enter a word to explore..." 
+            autocomplete="off"
+            required
+            autofocus
+          >
+          <button type="submit" class="wb-btn wb-btn-primary">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 4px;">
+              <circle cx="9" cy="9" r="7"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            Search
+          </button>
+        </div>
+
+        <div class="search-buttons">
+          <a href="{% url 'dictionary:random_word' %}" class="search-link">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 2.2"></path>
+            </svg>
+            Random Word
+          </a>
+          
+          <a href="{% url 'dictionary:favorites_list' %}" class="search-link">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            My Favorites
+          </a>
+
+          <a href="{% url 'dictionary:search_history' %}" class="search-link">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            History
+          </a>
+        </div>
+      </form>
+
+      {% if error %}
+      <div class="search-error wb-slide-up">
+        <strong>⚠ Search Error</strong>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Popular Words Section -->
+<section class="wb-py-3xl wb-bg-secondary">
+  <div class="wb-container">
+    <div class="wb-text-center wb-mb-2xl">
+      <h2 class="wb-text-2xl wb-font-bold wb-text-primary wb-mb-md">Popular Searches</h2>
+      <p class="wb-text-secondary">Start with trending words from our community</p>
+    </div>
+
+    <div class="quick-search-links">
+      <a href="?q=serendipity" class="quick-link-tag wb-hover-scale">Serendipity</a>
+      <a href="?q=ephemeral" class="quick-link-tag wb-hover-scale">Ephemeral</a>
+      <a href="?q=eloquent" class="quick-link-tag wb-hover-scale">Eloquent</a>
+      <a href="?q=nostalgic" class="quick-link-tag wb-hover-scale">Nostalgic</a>
+      <a href="?q=ambiguous" class="quick-link-tag wb-hover-scale">Ambiguous</a>
+      <a href="?q=benevolent" class="quick-link-tag wb-hover-scale">Benevolent</a>
+    </div>
+  </div>
+</section>
+
+<!-- Tips Section -->
+<section class="wb-py-3xl">
+  <div class="wb-container">
+    <div class="wb-grid md:wb-grid-cols-3 wb-gap-lg">
+      <!-- Tip 1 -->
+      <div class="wb-card wb-slide-up wb-stagger-item">
+        <div style="width: 48px; height: 48px; border-radius: var(--wb-radius-md); background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral)); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: var(--wb-spacing-lg);">
+          🔤
+        </div>
+        <h3 class="wb-text-lg wb-font-bold wb-text-primary wb-mb-sm">Exact Matches</h3>
+        <p class="wb-text-secondary wb-text-sm">Search for exact word spellings to get accurate definitions and pronunciations</p>
+      </div>
+
+      <!-- Tip 2 -->
+      <div class="wb-card wb-slide-up wb-stagger-item">
+        <div style="width: 48px; height: 48px; border-radius: var(--wb-radius-md); background: linear-gradient(135deg, var(--wb-lime), var(--wb-yellow)); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: var(--wb-spacing-lg);">
+          🎯
+        </div>
+        <h3 class="wb-text-lg wb-font-bold wb-text-primary wb-mb-sm">Smart Suggestions</h3>
+        <p class="wb-text-secondary wb-text-sm">Get spelling suggestions and related words even if you type it wrong</p>
+      </div>
+
+      <!-- Tip 3 -->
+      <div class="wb-card wb-slide-up wb-stagger-item">
+        <div style="width: 48px; height: 48px; border-radius: var(--wb-radius-md); background: linear-gradient(135deg, var(--wb-coral), var(--wb-rust)); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: var(--wb-spacing-lg);">
+          ⭐
+        </div>
+        <h3 class="wb-text-lg wb-font-bold wb-text-primary wb-mb-sm">Save Favorites</h3>
+        <p class="wb-text-secondary wb-text-sm">Save words you love and build your personal vocabulary collection</p>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

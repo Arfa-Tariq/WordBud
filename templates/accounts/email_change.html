@@ -1,3 +1,4 @@
+<!-- email_change.html -->
 {% extends "base.html" %}
 {% load static %}
 
@@ -7,68 +8,69 @@
 <style>
     .email-change-container {
         max-width: 600px;
-        margin: 60px auto;
-        padding: 20px;
+        margin: 0 auto;
+        padding: var(--wb-spacing-xl);
     }
     
     .page-header {
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: var(--wb-spacing-3xl);
     }
     
     .page-icon {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
+        background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+        border-radius: var(--wb-radius-full);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 40px;
-        margin: 0 auto 20px;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        font-size: var(--wb-text-3xl);
+        margin: 0 auto var(--wb-spacing-lg);
+        box-shadow: var(--wb-shadow-lg);
     }
     
     .page-title {
-        font-size: 32px;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 10px;
+        font-size: var(--wb-text-4xl);
+        font-weight: var(--wb-font-bold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-sm);
     }
     
     .page-subtitle {
-        color: #7f8c8d;
-        font-size: 16px;
-        line-height: 1.6;
+        color: var(--wb-text-secondary);
+        font-size: var(--wb-text-lg);
+        line-height: var(--wb-leading-relaxed);
     }
     
     .email-card {
-        background: white;
-        border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        background: var(--wb-bg-primary);
+        border-radius: var(--wb-radius-xl);
+        padding: var(--wb-spacing-3xl);
+        box-shadow: var(--wb-shadow-lg);
+        border: 1px solid var(--wb-border);
     }
     
     .current-email-display {
-        background: #f8f9fa;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 30px;
+        background: var(--wb-bg-secondary);
+        border: 2px solid var(--wb-border);
+        border-radius: var(--wb-radius-lg);
+        padding: var(--wb-spacing-xl);
+        margin-bottom: var(--wb-spacing-2xl);
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: var(--wb-spacing-lg);
     }
     
     .email-icon {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
+        background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+        border-radius: var(--wb-radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: var(--wb-text-xl);
         color: white;
         flex-shrink: 0;
     }
@@ -78,47 +80,47 @@
     }
     
     .email-label {
-        font-size: 13px;
-        color: #7f8c8d;
+        font-size: var(--wb-text-xs);
+        color: var(--wb-text-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 5px;
+        margin-bottom: var(--wb-spacing-xs);
     }
     
     .email-value {
-        font-size: 16px;
-        font-weight: 600;
-        color: #2c3e50;
+        font-size: var(--wb-text-base);
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
     }
     
     .form-section {
-        margin-bottom: 35px;
+        margin-bottom: var(--wb-spacing-3xl);
     }
     
     .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid #f0f0f0;
+        font-size: var(--wb-text-xl);
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-lg);
+        padding-bottom: var(--wb-spacing-md);
+        border-bottom: 2px solid var(--wb-border);
     }
     
     .form-group {
-        margin-bottom: 25px;
+        margin-bottom: var(--wb-spacing-xl);
     }
     
     .form-group label {
         display: block;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 8px;
-        font-size: 15px;
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-text-primary);
+        margin-bottom: var(--wb-spacing-sm);
+        font-size: var(--wb-text-base);
     }
     
     .form-group .required {
-        color: #e74c3c;
-        margin-left: 3px;
+        color: var(--wb-rust);
+        margin-left: var(--wb-spacing-xs);
     }
     
     .input-wrapper {
@@ -127,65 +129,73 @@
     
     .input-icon {
         position: absolute;
-        left: 15px;
+        left: var(--wb-spacing-lg);
         top: 50%;
         transform: translateY(-50%);
-        font-size: 20px;
-        color: #95a5a6;
+        font-size: var(--wb-text-lg);
+        color: var(--wb-text-tertiary);
     }
     
     .form-group input {
         width: 100%;
-        padding: 14px 16px 14px 45px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        font-size: 15px;
-        transition: all 0.3s;
+        padding: var(--wb-spacing-lg) var(--wb-spacing-lg) var(--wb-spacing-lg) var(--wb-spacing-3xl);
+        border: 2px solid var(--wb-border);
+        border-radius: var(--wb-radius-md);
+        font-size: var(--wb-text-base);
+        transition: all var(--wb-transition-base);
         font-family: inherit;
+        background: var(--wb-bg-secondary);
+        color: var(--wb-text-primary);
     }
     
     .form-group input:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        border-color: var(--wb-blue);
+        box-shadow: 0 0 0 3px rgba(137, 191, 254, 0.2);
     }
     
     .form-group input.error {
-        border-color: #e74c3c;
+        border-color: var(--wb-rust);
+    }
+    
+    .form-group input.success {
+        border-color: var(--wb-lime);
     }
     
     .help-text {
-        font-size: 13px;
-        color: #95a5a6;
-        margin-top: 8px;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-tertiary);
+        margin-top: var(--wb-spacing-xs);
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: var(--wb-spacing-xs);
     }
     
     .error-text {
-        font-size: 13px;
-        color: #e74c3c;
-        margin-top: 8px;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-rust);
+        margin-top: var(--wb-spacing-xs);
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-weight: 500;
+        gap: var(--wb-spacing-xs);
+        font-weight: var(--wb-font-medium);
     }
     
     .security-notice {
-        background: #fff3cd;
-        border: 2px solid #ffc107;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 30px;
+        background: rgba(252, 164, 81, 0.1);
+        border: 2px solid var(--wb-orange);
+        border-radius: var(--wb-radius-lg);
+        padding: var(--wb-spacing-xl);
+        margin-bottom: var(--wb-spacing-2xl);
         display: flex;
-        gap: 15px;
+        gap: var(--wb-spacing-lg);
+        align-items: flex-start;
     }
     
     .notice-icon {
-        font-size: 28px;
+        font-size: var(--wb-text-xl);
         flex-shrink: 0;
+        color: var(--wb-orange);
     }
     
     .notice-content {
@@ -193,26 +203,28 @@
     }
     
     .notice-title {
-        font-weight: 600;
-        color: #856404;
-        margin-bottom: 5px;
+        font-weight: var(--wb-font-semibold);
+        color: var(--wb-orange);
+        margin-bottom: var(--wb-spacing-xs);
     }
     
     .notice-text {
-        font-size: 14px;
-        color: #856404;
+        font-size: var(--wb-text-sm);
+        color: var(--wb-orange);
         margin: 0;
+        line-height: var(--wb-leading-relaxed);
     }
     
     .alert {
-        padding: 15px 20px;
-        border-radius: 12px;
-        margin-bottom: 25px;
+        padding: var(--wb-spacing-md) var(--wb-spacing-lg);
+        border-radius: var(--wb-radius-lg);
+        margin-bottom: var(--wb-spacing-lg);
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-weight: 500;
+        gap: var(--wb-spacing-sm);
+        font-weight: var(--wb-font-medium);
         animation: slideDown 0.3s ease-out;
+        border-left: 4px solid;
     }
     
     @keyframes slideDown {
@@ -227,148 +239,83 @@
     }
     
     .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border: 2px solid #c3e6cb;
+        background-color: rgba(167, 205, 90, 0.1);
+        border-color: var(--wb-lime);
+        color: var(--wb-lime);
     }
     
     .alert-error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 2px solid #f5c6cb;
+        background-color: rgba(202, 92, 75, 0.1);
+        border-color: var(--wb-rust);
+        color: var(--wb-rust);
     }
     
     .alert-icon {
-        font-size: 24px;
+        font-size: var(--wb-text-lg);
     }
     
     .form-actions {
         display: flex;
-        gap: 15px;
-        padding-top: 30px;
-        border-top: 2px solid #f0f0f0;
+        gap: var(--wb-spacing-md);
+        padding-top: var(--wb-spacing-2xl);
+        border-top: 2px solid var(--wb-border);
         flex-wrap: wrap;
     }
     
-    .btn {
-        padding: 14px 32px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 16px;
-        transition: all 0.3s;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
+    /* Email validation indicator */
+    .email-validation {
+        margin-top: var(--wb-spacing-sm);
+    }
+    
+    .validation-item {
+        display: flex;
         align-items: center;
-        gap: 10px;
-        justify-content: center;
+        gap: var(--wb-spacing-sm);
+        margin-bottom: var(--wb-spacing-xs);
+        font-size: var(--wb-text-sm);
+        color: var(--wb-text-secondary);
+        transition: color var(--wb-transition-base);
     }
     
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        flex: 1;
-        min-width: 200px;
+    .validation-item.valid {
+        color: var(--wb-lime);
     }
     
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    .validation-item.invalid {
+        color: var(--wb-rust);
     }
     
-    .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
-    }
-    
-    .btn-secondary {
-        background: white;
-        color: #7f8c8d;
-        border: 2px solid #e0e0e0;
-    }
-    
-    .btn-secondary:hover {
-        background: #f8f9fa;
-        border-color: #bdc3c7;
-    }
-    
-    .strength-meter {
-        height: 6px;
-        background: #e0e0e0;
-        border-radius: 3px;
-        overflow: hidden;
-        margin-top: 10px;
-    }
-    
-    .strength-fill {
-        height: 100%;
-        width: 0%;
-        transition: all 0.3s;
-        border-radius: 3px;
-    }
-    
-    .strength-weak { width: 33%; background: #e74c3c; }
-    .strength-medium { width: 66%; background: #f39c12; }
-    .strength-strong { width: 100%; background: #27ae60; }
-    
-    /* Dark Theme */
-    body.dark-theme .page-title {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .email-card {
-        background: #2c3e50;
-    }
-    
-    body.dark-theme .current-email-display {
-        background: #34495e;
-        border-color: #4a5568;
-    }
-    
-    body.dark-theme .email-value,
-    body.dark-theme .section-title,
-    body.dark-theme .form-group label {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .form-group input {
-        background: #34495e;
-        border-color: #4a5568;
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .form-group input::placeholder {
-        color: #7f8c8d;
+    .validation-icon {
+        font-size: var(--wb-text-sm);
     }
     
     @media (max-width: 768px) {
         .email-change-container {
-            margin: 30px auto;
-            padding: 15px;
+            margin: var(--wb-spacing-lg) auto;
+            padding: var(--wb-spacing-md);
         }
         
         .email-card {
-            padding: 25px;
+            padding: var(--wb-spacing-xl);
         }
         
         .page-title {
-            font-size: 26px;
+            font-size: var(--wb-text-3xl);
         }
         
         .current-email-display {
             flex-direction: column;
             text-align: center;
+            gap: var(--wb-spacing-md);
+        }
+        
+        .security-notice {
+            flex-direction: column;
+            gap: var(--wb-spacing-md);
         }
         
         .form-actions {
             flex-direction: column;
-        }
-        
-        .btn {
-            width: 100%;
         }
     }
 </style>
@@ -385,8 +332,7 @@
         </p>
     </div>
     
-    <!-- Messages
-    {% if messages %}
+    <!-- {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">
                 <span class="alert-icon">
@@ -397,7 +343,7 @@
         {% endfor %}
     {% endif %}
      -->
-    <div class="email-card">
+    <div class="email-card wb-slide-up">
         <!-- Current Email Display -->
         <div class="current-email-display">
             <div class="email-icon">✉️</div>
@@ -435,6 +381,19 @@
                         <span class="input-icon">📨</span>
                         {{ form.new_email }}
                     </div>
+                    
+                    <!-- Email Validation -->
+                    <div class="email-validation">
+                        <div class="validation-item" id="validation-format">
+                            <span class="validation-icon">⭕</span>
+                            <span>Valid email format</span>
+                        </div>
+                        <div class="validation-item" id="validation-match">
+                            <span class="validation-icon">⭕</span>
+                            <span>Email addresses match</span>
+                        </div>
+                    </div>
+                    
                     {% if form.new_email.help_text %}
                         <p class="help-text">
                             <span>ℹ️</span>
@@ -511,11 +470,11 @@
             
             <!-- Form Actions -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary" id="submitBtn">
+                <button type="submit" class="wb-btn wb-btn-primary" id="submitBtn">
                     <span>✉️</span>
                     Change Email Address
                 </button>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <a href="{% url 'accounts:profile' %}" class="wb-btn wb-btn-secondary">
                     Cancel
                 </a>
             </div>
@@ -530,47 +489,110 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmEmailInput = document.getElementById('id_confirm_email');
     const submitBtn = document.getElementById('submitBtn');
     
-    // Real-time email matching validation
-    function validateEmails() {
+    // Validation elements
+    const validationFormat = document.getElementById('validation-format');
+    const validationMatch = document.getElementById('validation-match');
+    
+    // Email format validation
+    function validateEmailFormat(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    // Update validation indicators
+    function updateValidationIndicators() {
         const newEmail = newEmailInput.value.trim();
         const confirmEmail = confirmEmailInput.value.trim();
         
-        if (confirmEmail && newEmail !== confirmEmail) {
-            confirmEmailInput.classList.add('error');
-            return false;
+        // Format validation
+        if (newEmail) {
+            if (validateEmailFormat(newEmail)) {
+                validationFormat.classList.add('valid');
+                validationFormat.classList.remove('invalid');
+                validationFormat.querySelector('.validation-icon').textContent = '✓';
+            } else {
+                validationFormat.classList.add('invalid');
+                validationFormat.classList.remove('valid');
+                validationFormat.querySelector('.validation-icon').textContent = '✗';
+            }
         } else {
-            confirmEmailInput.classList.remove('error');
-            return true;
+            validationFormat.classList.remove('valid', 'invalid');
+            validationFormat.querySelector('.validation-icon').textContent = '⭕';
+        }
+        
+        // Match validation
+        if (confirmEmail) {
+            if (newEmail === confirmEmail) {
+                validationMatch.classList.add('valid');
+                validationMatch.classList.remove('invalid');
+                validationMatch.querySelector('.validation-icon').textContent = '✓';
+                confirmEmailInput.classList.remove('error');
+                confirmEmailInput.classList.add('success');
+            } else {
+                validationMatch.classList.add('invalid');
+                validationMatch.classList.remove('valid');
+                validationMatch.querySelector('.validation-icon').textContent = '✗';
+                confirmEmailInput.classList.add('error');
+                confirmEmailInput.classList.remove('success');
+            }
+        } else {
+            validationMatch.classList.remove('valid', 'invalid');
+            validationMatch.querySelector('.validation-icon').textContent = '⭕';
+            confirmEmailInput.classList.remove('error', 'success');
         }
     }
     
-    confirmEmailInput.addEventListener('input', validateEmails);
+    // Real-time email validation
     newEmailInput.addEventListener('input', function() {
-        if (confirmEmailInput.value) {
-            validateEmails();
-        }
-    });
-    
-    // Form submission validation
-    form.addEventListener('submit', function(e) {
-        if (!validateEmails()) {
-            e.preventDefault();
-            alert('Email addresses do not match. Please check and try again.');
-            confirmEmailInput.focus();
-        }
-    });
-    
-    // Email format validation
-    newEmailInput.addEventListener('blur', function() {
         const email = this.value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         
-        if (email && !emailRegex.test(email)) {
+        if (email && !validateEmailFormat(email)) {
             this.classList.add('error');
         } else {
             this.classList.remove('error');
         }
+        
+        updateValidationIndicators();
     });
+    
+    confirmEmailInput.addEventListener('input', updateValidationIndicators);
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        const newEmail = newEmailInput.value.trim();
+        const confirmEmail = confirmEmailInput.value.trim();
+        
+        if (!validateEmailFormat(newEmail)) {
+            e.preventDefault();
+            WB.showToast('Please enter a valid email address.', 'error');
+            newEmailInput.focus();
+            return;
+        }
+        
+        if (newEmail !== confirmEmail) {
+            e.preventDefault();
+            WB.showToast('Email addresses do not match. Please check and try again.', 'error');
+            confirmEmailInput.focus();
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.innerHTML = '<span class="wb-spinner wb-spinner-sm"></span> Updating Email...';
+        submitBtn.disabled = true;
+    });
+    
+    // Initialize validation on page load
+    updateValidationIndicators();
+    
+    // Add input event listeners for real-time feedback
+    const passwordInput = document.getElementById('id_password');
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            if (this.value) {
+                this.classList.remove('error');
+            }
+        });
+    }
 });
 </script>
 {% endblock %}
