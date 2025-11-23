@@ -48,13 +48,17 @@
         <ul class="wb-navbar-menu" id="navMenu">
             <li><a href="{% url 'dictionary:dictionary' %}" class="wb-navbar-link">Dictionary</a></li>
             <li><a href="{% url 'translator:translate' %}" class="wb-navbar-link">Translator</a></li>
-            
+            <li><a href="{% url 'games:game_hub' %}" class="wb-navbar-link">Games</a></li>
             {% if user.is_authenticated %}
                 <li><a href="{% url 'dictionary:favorites_list' %}" class="wb-navbar-link">Favorites</a></li>
                 <li><a href="{% url 'dictionary:search_history' %}" class="wb-navbar-link">History</a></li>
                 <li><a href="{% url 'accounts:profile' %}" class="wb-navbar-link">
                     <div class="wb-avatar wb-avatar-sm">
-                        {{ user.email.0|upper }}
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="profile-avatar">
+                        {% else %}
+                        <div class="profile-avatar" aria-hidden="true">{{ user.get_full_name|first|upper }}</div>
+                        {% endif %}
                     </div>
                 </a></li>
                 <li>

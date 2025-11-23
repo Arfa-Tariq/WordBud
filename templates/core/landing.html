@@ -1,266 +1,519 @@
 {% extends "base.html" %}
-{% block title %}Welcome to WordBud - Your Personal Dictionary{% endblock %}
-
+{% load static %}
+{% block title %}WordBud - Learn Better with a Buddy{% endblock %}
 {% block extra_css %}
 <style>
-    .hero-section {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 60px 20px;
-        text-align: center;
+  /* Hero Section */
+  .hero-section {
+    position: relative;
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--wb-blue) 0%, var(--wb-coral) 50%, var(--wb-yellow) 100%);
+    overflow: hidden;
+  }
+  
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: hero-float 15s ease-in-out infinite;
+  }
+  
+  @keyframes hero-float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -20px); }
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--wb-spacing-3xl);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--wb-spacing-3xl);
+    align-items: center;
+  }
+  
+  .hero-text h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: var(--wb-spacing-lg);
+  }
+  
+  .hero-text .gradient-text {
+    background: linear-gradient(135deg, var(--wb-yellow), var(--wb-lime));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .hero-text p {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--wb-spacing-2xl);
+    line-height: 1.6;
+  }
+  
+  .hero-cta {
+    display: flex;
+    gap: var(--wb-spacing-md);
+    flex-wrap: wrap;
+  }
+  
+  .hero-cta .wb-btn-primary {
+    background: white;
+    color: var(--wb-blue);
+    padding: var(--wb-spacing-lg) var(--wb-spacing-2xl);
+    font-size: 1.125rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
+  
+  .hero-cta .wb-btn-primary:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  }
+  
+  .hero-cta .wb-btn-outline {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: var(--wb-spacing-lg) var(--wb-spacing-2xl);
+    font-size: 1.125rem;
+  }
+  
+  .hero-cta .wb-btn-outline:hover {
+    background: white;
+    color: var(--wb-blue);
+  }
+  
+  .hero-visual {
+    position: relative;
+    height: 500px;
+  }
+  
+  .floating-card {
+    position: absolute;
+    background: white;
+    border-radius: var(--wb-radius-lg);
+    padding: var(--wb-spacing-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: float-card 4s ease-in-out infinite;
+  }
+  
+  @keyframes float-card {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(2deg); }
+  }
+  
+  .floating-card-1 {
+    top: 50px;
+    left: 0;
+    width: 280px;
+    animation-delay: 0s;
+  }
+  
+  .floating-card-2 {
+    top: 200px;
+    right: 50px;
+    width: 240px;
+    animation-delay: 0.5s;
+  }
+  
+  .floating-card-3 {
+    bottom: 80px;
+    left: 80px;
+    width: 220px;
+    animation-delay: 1s;
+  }
+  
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--wb-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: var(--wb-spacing-sm);
+  }
+  
+  .card-title {
+    font-weight: bold;
+    font-size: 1.125rem;
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-xs);
+  }
+  
+  .card-text {
+    font-size: 0.875rem;
+    color: var(--wb-text-secondary);
+  }
+  
+  /* Features Section */
+  .features-section {
+    padding: var(--wb-spacing-3xl) 0;
+    background: var(--wb-bg-primary);
+  }
+  
+  .section-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto var(--wb-spacing-3xl);
+  }
+  
+  .section-badge {
+    display: inline-block;
+    padding: var(--wb-spacing-xs) var(--wb-spacing-md);
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+    color: white;
+    border-radius: var(--wb-radius-full);
+    font-size: var(--wb-text-sm);
+    font-weight: 600;
+    margin-bottom: var(--wb-spacing-md);
+  }
+  
+  .section-title {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-md);
+  }
+  
+  .section-subtitle {
+    font-size: 1.25rem;
+    color: var(--wb-text-secondary);
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--wb-spacing-xl);
+    margin-top: var(--wb-spacing-3xl);
+  }
+  
+  .feature-card {
+    background: var(--wb-bg-primary);
+    border: 2px solid var(--wb-border);
+    border-radius: var(--wb-radius-xl);
+    padding: var(--wb-spacing-xl);
+    transition: all var(--wb-transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--wb-blue), var(--wb-coral));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--wb-transition-base);
+  }
+  
+  .feature-card:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .feature-card:hover {
+    border-color: var(--wb-blue);
+    box-shadow: var(--wb-shadow-lg);
+    transform: translateY(-8px);
+  }
+  
+  .feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--wb-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: var(--wb-spacing-lg);
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));
+    color: white;
+  }
+  
+  .feature-card h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-sm);
+  }
+  
+  .feature-card p {
+    color: var(--wb-text-secondary);
+    line-height: 1.6;
+  }
+  
+  /* Stats Section */
+  .stats-section {
+    padding: var(--wb-spacing-3xl) 0;
+    background: linear-gradient(135deg, var(--wb-lime), var(--wb-yellow));
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stats-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 20s ease-in-out infinite;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--wb-spacing-xl);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .stat-card {
+    text-align: center;
+  }
+  
+  .stat-number {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--wb-text-primary);
+    margin-bottom: var(--wb-spacing-xs);
+  }
+  
+  .stat-label {
+    font-size: 1.125rem;
+    color: var(--wb-text-secondary);
+    font-weight: 500;
+  }
+  
+  /* CTA Section */
+  .cta-section {
+    padding: var(--wb-spacing-3xl) 0;
+    background: var(--wb-bg-secondary);
+  }
+  
+  .cta-card {
+    background: linear-gradient(135deg, var(--wb-blue), var(--wb-mauve));
+    border-radius: var(--wb-radius-xl);
+    padding: var(--wb-spacing-3xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    color: white;
+  }
+  
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 15s ease-in-out infinite;
+  }
+  
+  .cta-card h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: var(--wb-spacing-md);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .cta-card p {
+    font-size: 1.25rem;
+    margin-bottom: var(--wb-spacing-xl);
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .cta-card .wb-btn-primary {
+    background: white;
+    color: var(--wb-blue);
+    padding: var(--wb-spacing-lg) var(--wb-spacing-3xl);
+    font-size: 1.125rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Responsive */
+  @media (max-width: 968px) {
+    .hero-content {
+      grid-template-columns: 1fr;
+      text-align: center;
     }
     
-    .hero-title {
-        font-size: 56px;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+    .hero-visual {
+      display: none;
     }
     
-    .hero-subtitle {
-        font-size: 24px;
-        color: #7f8c8d;
-        margin-bottom: 40px;
+    .hero-text h1 {
+      font-size: 2.5rem;
     }
     
-    .cta-buttons {
-        display: flex;
-        gap: 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: 60px;
+    .hero-cta {
+      justify-content: center;
     }
     
-    .btn-large {
-        padding: 16px 40px;
-        font-size: 18px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s;
-        display: inline-block;
+    .section-title {
+      font-size: 2rem;
     }
     
-    .btn-primary-large {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    .stat-number {
+      font-size: 2.5rem;
     }
-    
-    .btn-primary-large:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    
-    .btn-secondary-large {
-        background: white;
-        color: #667eea;
-        border: 2px solid #667eea;
-    }
-    
-    .btn-secondary-large:hover {
-        background: #667eea;
-        color: white;
-    }
-    
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 30px;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 40px 20px;
-    }
-    
-    .feature-card {
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        transition: all 0.3s;
-        text-align: center;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-    
-    .feature-icon {
-        font-size: 48px;
-        margin-bottom: 20px;
-    }
-    
-    .feature-title {
-        font-size: 22px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-    
-    .feature-desc {
-        color: #7f8c8d;
-        line-height: 1.6;
-    }
-    
-    .quick-search-section {
-        max-width: 700px;
-        margin: 60px auto;
-        padding: 40px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border-radius: 16px;
-    }
-    
-    .quick-search-title {
-        font-size: 28px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .quick-search-form {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .quick-search-input {
-        flex: 1;
-        padding: 16px 24px;
-        font-size: 18px;
-        border: 2px solid #ddd;
-        border-radius: 10px;
-        background: white;
-    }
-    
-    .quick-search-btn {
-        padding: 16px 32px;
-        font-size: 18px;
-        background: #667eea;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-    
-    .quick-search-btn:hover {
-        background: #5568d3;
-        transform: scale(1.05);
-    }
-    
-    body.dark-theme .hero-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    body.dark-theme .feature-card {
-        background: #2c3e50;
-        border: 1px solid #34495e;
-    }
-    
-    body.dark-theme .feature-title {
-        color: #ecf0f1;
-    }
-    
-    body.dark-theme .quick-search-input {
-        background: #34495e;
-        border-color: #4a5568;
-        color: #ecf0f1;
-    }
-    
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 36px;
-        }
-        
-        .hero-subtitle {
-            font-size: 18px;
-        }
-        
-        .quick-search-form {
-            flex-direction: column;
-        }
-        
-        .cta-buttons {
-            flex-direction: column;
-            align-items: stretch;
-        }
-    }
+  }
 </style>
 {% endblock %}
-
 {% block content %}
-<div class="hero-section">
-    <h1 class="hero-title">📖 Welcome to WordBud</h1>
-    <p class="hero-subtitle">Your comprehensive dictionary companion for exploring words, meanings, and more!</p>
-    
-    <div class="cta-buttons">
-        <a href="{% url 'dictionary:dictionary' %}" class="btn-large btn-primary-large">🔍 Start Exploring</a>
-        {% if not user.is_authenticated %}
-        <a href="{% url 'accounts:signup' %}" class="btn-large btn-secondary-large">✨ Sign Up Free</a>
-        {% else %}
-        <a href="{% url 'core:home' %}" class="btn-large btn-secondary-large">🏠 Go to Dashboard</a>
-        {% endif %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="hero-text wb-slide-up">
+      <h1>
+        Learn Better with a <span class="gradient-text">Buddy</span>
+      </h1>
+      <p>
+        Your comprehensive language companion. Master vocabulary, explore definitions, translate seamlessly, and expand your knowledge—all in one place.
+      </p>
+      <div class="hero-cta">
+        <a href="{% url 'accounts:signup' %}" class="wb-btn wb-btn-primary">
+          Get Started Free
+        </a>
+        <a href="{% url 'dictionary:dictionary' %}" class="wb-btn wb-btn-outline">
+          Try Dictionary
+        </a>
+      </div>
     </div>
+<div class="hero-visual">
+  <div class="floating-card floating-card-1 wb-slide-up wb-delay-100">
+    <div class="card-icon" style="background: linear-gradient(135deg, var(--wb-blue), var(--wb-coral));">
+      📖
+    </div>
+    <div class="card-title">Dictionary</div>
+    <div class="card-text">Comprehensive definitions with examples</div>
+  </div>
+  
+  <div class="floating-card floating-card-2 wb-slide-up wb-delay-200">
+    <div class="card-icon" style="background: linear-gradient(135deg, var(--wb-lime), var(--wb-yellow));">
+      🌐
+    </div>
+    <div class="card-title">Translator</div>
+    <div class="card-text">100+ languages at your fingertips</div>
+  </div>
+  
+  <div class="floating-card floating-card-3 wb-slide-up wb-delay-300">
+    <div class="card-icon" style="background: linear-gradient(135deg, var(--wb-coral), var(--wb-rust));">
+      ⭐
+    </div>
+    <div class="card-title">Favorites</div>
+    <div class="card-text">Build your personal word collection</div>
+  </div>
 </div>
-
-<!-- Quick Search Section -->
-<div class="quick-search-section">
-    <h2 class="quick-search-title">Quick Word Search</h2>
-    <form method="get" action="{% url 'dictionary:search' %}" class="quick-search-form">
-        <input type="text" name="q" class="quick-search-input" placeholder="Type any word..." required>
-        <button type="submit" class="quick-search-btn">Search</button>
-    </form>
-</div>
-
-<!-- Features Grid -->
+  </div>
+</section>
+<!-- Features Section -->
+<section class="features-section">
+  <div class="wb-container">
+    <div class="section-header wb-slide-up">
+      <span class="section-badge">Features</span>
+      <h2 class="section-title">Everything You Need to Learn</h2>
+      <p class="section-subtitle">Powerful tools designed to accelerate your language mastery</p>
+    </div>
 <div class="features-grid">
-    <div class="feature-card">
-        <div class="feature-icon">📚</div>
-        <h3 class="feature-title">Comprehensive Definitions</h3>
-        <p class="feature-desc">Get detailed definitions, examples, and usage from Merriam-Webster's trusted dictionary.</p>
-    </div>
-    
-    <div class="feature-card">
-        <div class="feature-icon">🔊</div>
-        <h3 class="feature-title">Audio Pronunciations</h3>
-        <p class="feature-desc">Listen to correct pronunciations and learn IPA phonetic symbols for every word.</p>
-    </div>
-    
-    <div class="feature-card">
-        <div class="feature-icon">📜</div>
-        <h3 class="feature-title">Word Etymology</h3>
-        <p class="feature-desc">Discover the fascinating origins and historical development of words.</p>
-    </div>
-    
-    <div class="feature-card">
-        <div class="feature-icon">🔄</div>
-        <h3 class="feature-title">Synonyms & Antonyms</h3>
-        <p class="feature-desc">Expand your vocabulary with related words, synonyms, and antonyms.</p>
-    </div>
-    
-    <div class="feature-card">
-        <div class="feature-icon">⭐</div>
-        <h3 class="feature-title">Save Favorites</h3>
-        <p class="feature-desc">Create your personal word collection. <strong>Sign up required!</strong></p>
-    </div>
-    <div class="feature-card">
-        <div class="feature-icon">🎲</div>
-        <h3 class="feature-title">Word of the Day</h3>
-        <p class="feature-desc">Learn a new word every day and build your vocabulary naturally.</p>
-    </div>
-        <div class="feature-card">
-        <div class="feature-icon">🌐</div>
-        <h3 class="feature-title">Language Translator</h3>
-        <p class="feature-desc">Translate text between 100+ languages instantly with auto-detection support.</p>
-    </div>
-    
+  <div class="feature-card wb-slide-up wb-stagger-item wb-hover-lift">
+    <div class="feature-icon">📚</div>
+    <h3>Rich Definitions</h3>
+    <p>Access comprehensive definitions, pronunciations, etymology, and usage examples from Merriam-Webster's trusted database.</p>
+  </div>
+  
+  <div class="feature-card wb-slide-up wb-stagger-item wb-hover-lift">
+    <div class="feature-icon">🔊</div>
+    <h3>Audio Pronunciation</h3>
+    <p>Listen to correct pronunciations and learn IPA phonetic symbols for accurate speaking.</p>
+  </div>
+  
+  <div class="feature-card wb-slide-up wb-stagger-item wb-hover-lift">
+    <div class="feature-icon">🌍</div>
+    <h3>Multi-Language Translation</h3>
+    <p>Translate text between 100+ languages with auto-detection and context-aware results.</p>
+  </div>
+  
+  <div class="feature-card wb-slide-up wb-stagger-item wb-hover-lift">
+    <div class="feature-icon">⭐</div>
+    <h3>Personal Favorites</h3>
+    <p>Save words you love and build your custom vocabulary collection for quick access.</p>
+  </div>
+  
+  <div class="feature-card wb-slide-up wb-stagger-item wb-hover-lift">
+    <div class="feature-icon">🕒</div>
+    <h3>Search History</h3>
+    <p>Track your learning journey with automatic search history and popular word analytics.</p>
+  </div>
+  
+  <div class="feature-card wb-slide-up wb-stagger-item wb-hover-lift">
+    <div class="feature-icon">🎲</div>
+    <h3>Word of the Day</h3>
+    <p>Discover a new word every day to expand your vocabulary naturally and consistently.</p>
+  </div>
 </div>
+  </div>
+</section>
+<!-- Stats Section -->
+<section class="stats-section">
+  <div class="wb-container">
+    <div class="stats-grid">
+      <div class="stat-card wb-scale-in wb-delay-100">
+        <div class="stat-number">100K+</div>
+        <div class="stat-label">Words Defined</div>
+      </div>
+  <div class="stat-card wb-scale-in wb-delay-200">
+    <div class="stat-number">100+</div>
+    <div class="stat-label">Languages Supported</div>
+  </div>
+  
+  <div class="stat-card wb-scale-in wb-delay-300">
+    <div class="stat-number">24/7</div>
+    <div class="stat-label">Always Available</div>
+  </div>
+  
+  <div class="stat-card wb-scale-in wb-delay-400">
+    <div class="stat-number">Free</div>
+    <div class="stat-label">Forever Plan</div>
+  </div>
+</div>
+  </div>
+</section>
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="wb-container">
+    <div class="cta-card wb-scale-in">
+      <h2>Ready to Start Learning?</h2>
+      <p>Join thousands of learners expanding their vocabulary every day</p>
+      <a href="{% url 'accounts:signup' %}" class="wb-btn wb-btn-primary wb-btn-lg">
+        Create Free Account
+      </a>
+    </div>
+  </div>
+</section>
 {% endblock %}
